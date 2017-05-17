@@ -1,8 +1,5 @@
 package ca._1360.liborbit.pipeline;
 
-import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
-import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
-
 public final class OrbitPipelineConnection {
     private OrbitPipelineOutputEndpoint source;
     private OrbitPipelineInputEndpoint destination;

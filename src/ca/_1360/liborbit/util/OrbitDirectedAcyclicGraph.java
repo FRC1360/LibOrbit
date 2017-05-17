@@ -1,7 +1,5 @@
 package ca._1360.liborbit.util;
 
-import ca._1360.liborbit.util.OrbitContainer;
-
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedList;
