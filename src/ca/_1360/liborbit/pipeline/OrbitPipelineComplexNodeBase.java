@@ -14,6 +14,15 @@ public abstract class OrbitPipelineComplexNodeBase {
 
     protected abstract void update();
 
+    private void runUpdate() {
+        if (updated == count) {
+            if (updateIfNoValues || values)
+                update();
+            values = false;
+            updated = 0;
+        }
+    }
+
     protected final class InputEndpoint implements OrbitPipelineInputEndpoint {
         private double value;
 
@@ -34,16 +43,14 @@ public abstract class OrbitPipelineComplexNodeBase {
         public void accept(double v) {
             value = v;
             values = true;
-            if (++updated == count) {
-                updated = 0;
-                values = false;
-                update();
-            }
+            ++updated;
+            runUpdate();
         }
 
         @Override
         public void acceptNoInput() {
             ++updated;
+            runUpdate();
         }
     }
 
