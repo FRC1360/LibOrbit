@@ -1,9 +1,7 @@
 package ca._1360.liborbit.util;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.Stack;
+import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -31,17 +29,24 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
 
     public synchronized final void remove(T object) {
         objects.remove(object);
+        relationships.removeIf(relationship -> relationship.getTo() == object || relationship.getFrom() == object);
     }
 
-    public synchronized final Relationship createRelationship(T from, T to) {
+    public synchronized final Relationship createRelationship(T from, T to) throws OrbitDirectedCycleException {
+        boolean success = false;
         Relationship relationship = createRelationshipCore(from, to);
-        invalidate();
-        return relationship;
+        try {
+            invalidate();
+            success = true;
+            return relationship;
+        } finally {
+            if (!success)
+                destroyRelationship(relationship);
+        }
     }
 
     public synchronized final void destroyRelationship(Relationship relationship) {
         relationships.remove(relationship);
-        invalidate();
     }
 
     public synchronized final void runBatch(Iterable<BatchOperation> operations) throws BatchOperationException {
@@ -65,8 +70,27 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
         return relationship;
     }
 
-    protected final void invalidate() {
-
+    protected final void invalidate() throws OrbitDirectedCycleException {
+        HashMap<T, ArrayList<T>> incomingMap = new HashMap<>();
+        for (Relationship relationship : relationships)
+            incomingMap.computeIfAbsent(relationship.getTo(), e -> new ArrayList<>()).add(relationship.getFrom());
+        ArrayDeque<T> noEdges = new ArrayDeque<>();
+        objects.stream().filter(((Predicate<T>) incomingMap::containsKey).negate()).forEach(noEdges::add);
+        LinkedList<T> list = new LinkedList<>();
+        OrbitMiscUtilities.stream(() -> noEdges.isEmpty() ? Optional.empty() : Optional.of(noEdges.pop())).forEach(object -> {
+            list.add(object);
+            incomingMap.entrySet().stream().filter(o -> o.getValue().contains(object)).forEach(o -> {
+                o.getValue().remove(object);
+                if (o.getValue().isEmpty()) {
+                    incomingMap.remove(o.getKey());
+                    noEdges.push(o.getKey());
+                }
+            });
+        });
+        if (incomingMap.isEmpty())
+            objects = list;
+        else
+            throw new OrbitDirectedCycleException();
     }
 
     public final BatchOperation addOp(T object) {
@@ -75,10 +99,19 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
 
     public final BatchOperation removeOp(T object) {
         OrbitContainer<Integer> pos = new OrbitContainer<>(null);
+        Stack<Relationship> removed = new Stack<>();
         return new BatchOperation(() -> {
             pos.setValue(objects.indexOf(object));
             objects.remove(pos.getValue().intValue());
-        }, () -> objects.add(pos.getValue(), object));
+            for (Relationship relationship : relationships)
+                if (relationship.getFrom() == object || relationship.getTo() == object) {
+                    relationships.remove(relationship);
+                    removed.add(relationship);
+                }
+        }, () -> {
+            objects.add(pos.getValue(), object);
+            relationships.addAll(removed);
+        });
     }
 
     public final BatchOperation createRelationshipOp(T from, T to) {
