@@ -11,15 +11,15 @@ public final class OrbitPipelineManager {
 
     private OrbitPipelineManager() {}
 
-    static void addConnection(OrbitPipelineConnection connection) throws CyclicDependencyException {
+    static void addConnection(OrbitPipelineConnection connection) throws OrbitPipelineCyclicDependencyException {
         try {
             connections.add(connection, connections.stream().filter(c -> connection.getSource().dependsOn(c.getDestination()))::iterator, connections.stream().filter(c -> c.getSource().dependsOn(connection.getDestination()))::iterator);
         } catch (OrbitDirectedAcyclicGraph.BatchOperationException e) {
-            throw new CyclicDependencyException(e);
+            throw new OrbitPipelineCyclicDependencyException(e);
         }
     }
 
-    static void updateEnabled(OrbitPipelineConnection connection, boolean enabled) throws CyclicDependencyException {
+    static void updateEnabled(OrbitPipelineConnection connection, boolean enabled) throws OrbitPipelineCyclicDependencyException {
         if (enabled)
             addConnection(connection);
         else
@@ -37,11 +37,11 @@ public final class OrbitPipelineManager {
         }
     }
 
-    public static void runBatch(BatchOperation[] operations) throws CyclicDependencyException {
+    public static void runBatch(BatchOperation[] operations) throws OrbitPipelineCyclicDependencyException {
         try {
             connections.runBatch(Arrays.stream(operations).map(BatchOperation::getOperations).flatMap(List::stream)::iterator);
         } catch (OrbitDirectedAcyclicGraph.BatchOperationException e) {
-            throw new CyclicDependencyException(e);
+            throw new OrbitPipelineCyclicDependencyException(e);
         }
     }
 
@@ -58,12 +58,6 @@ public final class OrbitPipelineManager {
 
         private List<OrbitDirectedAcyclicGraph<OrbitPipelineConnection>.BatchOperation> getOperations() {
             return operations;
-        }
-    }
-
-    public static final class CyclicDependencyException extends Exception {
-        private CyclicDependencyException(Throwable throwable) {
-            super("A attempt was made to add a connection which would result in a cyclic dependency in the pipeline system", throwable);
         }
     }
 }
