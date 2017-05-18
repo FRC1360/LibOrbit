@@ -6,7 +6,6 @@ import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
 import java.util.OptionalDouble;
 
 public abstract class OrbitPipelineFilter implements OrbitPipelineInputEndpoint, OrbitPipelineOutputEndpoint {
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private OptionalDouble result = OptionalDouble.empty();
 
     protected abstract OptionalDouble calculate(double input);

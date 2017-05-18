@@ -1,6 +1,7 @@
 package ca._1360.liborbit.pipeline.filters;
 
 public final class OrbitSlewFilter extends OrbitSimplePipelineFilter {
+    private double last;
     private double maxRate;
     private double minValue;
     private double maxValue;
@@ -10,6 +11,7 @@ public final class OrbitSlewFilter extends OrbitSimplePipelineFilter {
         this.maxRate = maxRate;
         this.minValue = minValue;
         this.maxValue = maxValue;
+        lastUpdateTime = System.currentTimeMillis();
     }
 
     public double getMaxRate() {
@@ -38,6 +40,9 @@ public final class OrbitSlewFilter extends OrbitSimplePipelineFilter {
 
     @Override
     protected double calculateCore(double input) {
-        return 0;
+        long time = System.currentTimeMillis();
+        last = Math.max(Math.min(Math.copySign(input - last, Math.min(Math.abs(input - last), maxRate * (time - lastUpdateTime))), maxValue), minValue);
+        lastUpdateTime = time;
+        return last;
     }
 }
