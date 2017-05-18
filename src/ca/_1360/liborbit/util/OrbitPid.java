@@ -1,74 +1,99 @@
 package ca._1360.liborbit.util;
 
-import ca._1360.liborbit.pipeline.OrbitPipelineComplexNodeBase;
+import ca._1360.liborbit.pipeline.*;
+import ca._1360.liborbit.pipeline.filters.OrbitDerivationFilter;
+import ca._1360.liborbit.pipeline.filters.OrbitIdentityFilter;
+import ca._1360.liborbit.pipeline.filters.OrbitIntegrationFilter;
+import ca._1360.liborbit.pipeline.filters.OrbitUnaryOperatorFilter;
+import ca._1360.liborbit.statemachine.OrbitPipelineConnectionBasedStateMachine;
+import ca._1360.liborbit.statemachine.OrbitStateMachineStates;
 
-public final class OrbitPid extends OrbitPipelineComplexNodeBase {
-    long lastTime;
-    InputEndpoint epsilon;
-    InputEndpoint kP;
-    InputEndpoint kI;
-    InputEndpoint kD;
-    InputEndpoint kIInner;
-    InputEndpoint kIOuter;
-    InputEndpoint target;
-    InputEndpoint input;
-    OutputEndpoint error = new OutputEndpoint(0.0, false);
-    OutputEndpoint output = new OutputEndpoint(0.0, false);
+import java.util.HashMap;
 
-    public OrbitPid(double epsilon, double kP, double kI, double kD, double kIInner, double kIOuter, double target, double input) {
-        super(true);
-        this.epsilon = new InputEndpoint(epsilon);
-        this.kP = new InputEndpoint(kP);
-        this.kI = new InputEndpoint(kI);
-        this.kD = new InputEndpoint(kD);
-        this.kIInner = new InputEndpoint(kIInner);
-        this.kIOuter = new InputEndpoint(kIOuter);
-        this.target = new InputEndpoint(target);
-        this.input = new InputEndpoint(input);
+public final class OrbitPid {
+    private OrbitBinaryOperatorNode error = new OrbitBinaryOperatorNode(true, (x, y) -> x - y);
+    private OrbitBinaryOperatorNode pScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
+    private OrbitBinaryOperatorNode iScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
+    private OrbitBinaryOperatorNode dScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
+    private OrbitIdentityFilter inner = new OrbitIdentityFilter();
+    private OrbitIdentityFilter outer = new OrbitIdentityFilter();
+    private OrbitIntegrationFilter integral = new OrbitIntegrationFilter();
+    private OrbitDerivationFilter derivative = new OrbitDerivationFilter();
+    private OrbitBinaryOperatorNode addMain = new OrbitBinaryOperatorNode(true, (x, y) -> x + y);
+    private OrbitBinaryOperatorNode addID = new OrbitBinaryOperatorNode(true, (x, y) -> x + y);
+    private OrbitUnaryOperatorFilter absError = new OrbitUnaryOperatorFilter(Math::abs);
+    private OrbitPipelineConnectionBasedStateMachine<IntegralUseStates> integralControlStateMachine;
+
+    public OrbitPid(double kP, double kI, double kD, double kIInner, double kIOuter, double target) {
+        pScale.getInput2().accept(kP);
+        iScale.getInput2().accept(kI);
+        dScale.getInput2().accept(kD);
+        inner.accept(kIInner);
+        outer.accept(kIOuter);
+        error.getInput2().accept(target);
+        try {
+            HashMap<IntegralUseStates, OrbitPipelineConnection[]> map = new HashMap<>();
+            map.put(IntegralUseStates.ENABLED, new OrbitPipelineConnection[]{new OrbitPipelineConnection(addID.getOutput(), addMain.getInput2(), false)});
+            map.put(IntegralUseStates.DISABLED, new OrbitPipelineConnection[]{new OrbitPipelineConnection(derivative, addMain.getInput2(), false)});
+            integralControlStateMachine = new OrbitPipelineConnectionBasedStateMachine<>(IntegralUseStates.ENABLED, map);
+            integralControlStateMachine.addStateChangeHandler((oldState, newState) -> {
+                if (newState == IntegralUseStates.ENABLED)
+                    integral.reset();
+            });
+            OrbitPipelineManager.runBatch(new OrbitPipelineManager.BatchOperation[]{
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), integral, true)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), derivative, true)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), pScale.getInput1(), true)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(integral, iScale.getInput1(), true)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(derivative, dScale.getInput1(), true)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(pScale.getOutput(), addMain.getInput1(), false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(iScale.getOutput(), addID.getInput1(), false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(dScale.getOutput(), addID.getInput2(), false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), absError, false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(absError, new OrbitPipelineExportConnector<>(e -> e >= inner.get().orElse(0.0) && e <= outer.get().orElse(Double.POSITIVE_INFINITY) ? IntegralUseStates.ENABLED : IntegralUseStates.DISABLED, integralControlStateMachine::setState), false))
+            });
+        } catch (OrbitPipelineInvalidConfigurationException e) {
+            e.printStackTrace();
+        }
     }
 
-    public InputEndpoint getEpsilon() {
-        return epsilon;
+    public OrbitPipelineInputEndpoint getkP() {
+        return pScale.getInput2();
     }
 
-    public InputEndpoint getkP() {
-        return kP;
+    public OrbitPipelineInputEndpoint getkI() {
+        return iScale.getInput2();
     }
 
-    public InputEndpoint getkI() {
-        return kI;
+    public OrbitPipelineInputEndpoint getkD() {
+        return dScale.getInput2();
     }
 
-    public InputEndpoint getkD() {
-        return kD;
+    public OrbitPipelineInputEndpoint getkIInner() {
+        return inner;
     }
 
-    public InputEndpoint getkIInner() {
-        return kIInner;
+    public OrbitPipelineInputEndpoint getkIOuter() {
+        return outer;
     }
 
-    public InputEndpoint getkIOuter() {
-        return kIOuter;
+    public OrbitPipelineInputEndpoint getTarget() {
+        return error.getInput2();
     }
 
-    public InputEndpoint getTarget() {
-        return target;
+    public OrbitPipelineInputEndpoint getInput() {
+        return error.getInput1();
     }
 
-    public InputEndpoint getInput() {
-        return input;
+    public OrbitPipelineOutputEndpoint getError() {
+        return error.getOutput();
     }
 
-    public OutputEndpoint getError() {
-        return error;
+    public OrbitPipelineOutputEndpoint getOutput() {
+        return addMain.getOutput();
     }
 
-    public OutputEndpoint getOutput() {
-        return output;
-    }
-
-    @Override
-    protected void update() {
-
+    private enum IntegralUseStates implements OrbitStateMachineStates {
+        ENABLED, DISABLED;
     }
 }
