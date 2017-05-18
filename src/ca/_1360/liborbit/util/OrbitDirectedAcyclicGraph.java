@@ -1,6 +1,7 @@
 package ca._1360.liborbit.util;
 
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -125,6 +126,12 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
             pos.setValue(relationships.indexOf(relationship));
             relationships.remove(pos.getValue().intValue());
         }, () -> relationships.add(pos.getValue(), relationship));
+    }
+
+    public final BatchOperation predicateOp(BiPredicate<Set<T>, Set<Relationship>> predicate) {
+        return new BatchOperation(() -> {
+            assert predicate.test(new HashSet<>(objects), new HashSet<>(relationships));
+        }, () -> {});
     }
 
     public final class Relationship {

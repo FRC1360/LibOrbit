@@ -11,17 +11,13 @@ public final class OrbitPipelineManager {
 
     private OrbitPipelineManager() {}
 
-    static void addConnection(OrbitPipelineConnection connection) throws OrbitPipelineCyclicDependencyException {
-        try {
-            connections.add(connection, connections.stream().filter(c -> connection.getSource().dependsOn(c.getDestination()))::iterator, connections.stream().filter(c -> c.getSource().dependsOn(connection.getDestination()))::iterator);
-        } catch (OrbitDirectedAcyclicGraph.BatchOperationException e) {
-            throw new OrbitPipelineCyclicDependencyException(e);
-        }
-    }
-
-    static void updateEnabled(OrbitPipelineConnection connection, boolean enabled) throws OrbitPipelineCyclicDependencyException {
+    static void updateEnabled(OrbitPipelineConnection connection, boolean enabled) throws OrbitPipelineInvalidConfigurationException {
         if (enabled)
-            addConnection(connection);
+            try {
+                connections.runBatch(enableOp(connection).getOperations());
+            } catch (OrbitDirectedAcyclicGraph.BatchOperationException e) {
+                throw new OrbitPipelineInvalidConfigurationException(e);
+            }
         else
             connections.remove(connection);
     }
@@ -37,16 +33,20 @@ public final class OrbitPipelineManager {
         }
     }
 
-    public static void runBatch(BatchOperation[] operations) throws OrbitPipelineCyclicDependencyException {
+    public static void runBatch(BatchOperation[] operations) throws OrbitPipelineInvalidConfigurationException {
         try {
             connections.runBatch(Arrays.stream(operations).map(BatchOperation::getOperations).flatMap(List::stream)::iterator);
         } catch (OrbitDirectedAcyclicGraph.BatchOperationException e) {
-            throw new OrbitPipelineCyclicDependencyException(e);
+            throw new OrbitPipelineInvalidConfigurationException(e);
         }
     }
 
     public static BatchOperation enableOp(OrbitPipelineConnection connection) {
-        return new BatchOperation(Stream.concat(Stream.of(connections.addOp(connection)), Stream.concat(connections.stream().filter(c -> connection.getSource().dependsOn(c.getDestination())).map(c -> connections.createRelationshipOp(c, connection)), connections.stream().filter(c -> c.getSource().dependsOn(connection.getDestination())).map(c -> connections.createRelationshipOp(connection, c)))).collect(Collectors.toList()));
+        return new BatchOperation(Stream.concat(Stream.concat(Stream.of(connections.predicateOp((objects, relationships) -> objects.stream().noneMatch(o -> o.getDestination() == connection.getDestination()))), Stream.of(connections.addOp(connection))), Stream.concat(connections.stream().filter(c -> connection.getSource().dependsOn(c.getDestination())).map(c -> connections.createRelationshipOp(c, connection)), connections.stream().filter(c -> c.getSource().dependsOn(connection.getDestination())).map(c -> connections.createRelationshipOp(connection, c)))).collect(Collectors.toList()));
+    }
+
+    public static BatchOperation disableOp(OrbitPipelineConnection connection) {
+        return new BatchOperation(Collections.singletonList(connections.removeOp(connection)));
     }
 
     public static final class BatchOperation {

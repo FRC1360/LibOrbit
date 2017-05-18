@@ -5,11 +5,11 @@ public final class OrbitPipelineConnection {
     private OrbitPipelineInputEndpoint destination;
     private boolean enabled;
 
-    public OrbitPipelineConnection(OrbitPipelineOutputEndpoint source, OrbitPipelineInputEndpoint destination, boolean enabled) throws OrbitPipelineCyclicDependencyException {
+    public OrbitPipelineConnection(OrbitPipelineOutputEndpoint source, OrbitPipelineInputEndpoint destination, boolean enabled) throws OrbitPipelineInvalidConfigurationException {
         this.source = source;
         this.destination = destination;
         this.enabled = enabled;
-        OrbitPipelineManager.addConnection(this);
+        OrbitPipelineManager.updateEnabled(this, enabled);
     }
 
     public OrbitPipelineOutputEndpoint getSource() {
@@ -24,7 +24,7 @@ public final class OrbitPipelineConnection {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) throws OrbitPipelineCyclicDependencyException {
+    public void setEnabled(boolean enabled) throws OrbitPipelineInvalidConfigurationException {
         if (enabled != this.enabled)
             OrbitPipelineManager.updateEnabled(this, enabled);
         this.enabled = enabled;
