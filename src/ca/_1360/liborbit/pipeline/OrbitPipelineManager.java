@@ -41,6 +41,22 @@ public final class OrbitPipelineManager {
         }
     }
 
+    public static void disconnect(OrbitPipelineInputEndpoint endpoint) throws OrbitPipelineInvalidConfigurationException {
+        runBatch(connections.stream().filter(c -> c.getDestination() == endpoint).map(OrbitPipelineManager::disableOp).toArray(BatchOperation[]::new));
+    }
+
+    public static void disconnect(OrbitPipelineOutputEndpoint endpoint) throws OrbitPipelineInvalidConfigurationException {
+        runBatch(connections.stream().filter(c -> c.getSource() == endpoint).map(OrbitPipelineManager::disableOp).toArray(BatchOperation[]::new));
+    }
+
+    public static BatchOperation disconnectOp(OrbitPipelineInputEndpoint endpoint) {
+        return new BatchOperation(connections.stream().filter(c -> c.getDestination() == endpoint).map(OrbitPipelineManager::disableOp).map(BatchOperation::getOperations).flatMap(List::stream).collect(Collectors.toList()));
+    }
+
+    public static BatchOperation disconnectOp(OrbitPipelineOutputEndpoint endpoint) {
+        return new BatchOperation(connections.stream().filter(c -> c.getSource() == endpoint).map(OrbitPipelineManager::disableOp).map(BatchOperation::getOperations).flatMap(List::stream).collect(Collectors.toList()));
+    }
+
     public static BatchOperation enableOp(OrbitPipelineConnection connection) {
         return new BatchOperation(Stream.concat(Stream.concat(Stream.of(connections.predicateOp((objects, relationships) -> objects.stream().noneMatch(o -> o.getDestination() == connection.getDestination()))), Stream.of(connections.addOp(connection))), Stream.concat(connections.stream().filter(c -> connection.getSource().dependsOn(c.getDestination())).map(c -> connections.createRelationshipOp(c, connection)), connections.stream().filter(c -> c.getSource().dependsOn(connection.getDestination())).map(c -> connections.createRelationshipOp(connection, c)))).collect(Collectors.toList()));
     }
