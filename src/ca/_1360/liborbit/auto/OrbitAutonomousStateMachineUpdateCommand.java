@@ -10,8 +10,13 @@ public class OrbitAutonomousStateMachineUpdateCommand<T, U extends OrbitStateMac
     private StateMachineUpdate<U> update;
 
     public OrbitAutonomousStateMachineUpdateCommand(T subsystem, OrbitStateMachine<U> stateMachine, U state) {
-        super(subsystem);
+        super(subsystem, 0);
         update = new StateMachineUpdate<>(stateMachine, state);
+    }
+
+    @Override
+    public void initialize() {
+        gotoNext();
     }
 
     @Override

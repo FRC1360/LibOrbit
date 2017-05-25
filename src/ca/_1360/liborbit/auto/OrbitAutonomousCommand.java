@@ -10,13 +10,19 @@ public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineSimp
     private final T subsystem;
     private Runnable gotoNextFunc;
     private boolean running;
+    private long timeout;
 
-    public OrbitAutonomousCommand(T subsystem) {
+    public OrbitAutonomousCommand(T subsystem, long timeout) {
         this.subsystem = subsystem;
+        this.timeout = timeout;
     }
 
     public T getSubsystem() {
         return subsystem;
+    }
+
+    public long getTimeout() {
+        return timeout;
     }
 
     public void join() throws InterruptedException {

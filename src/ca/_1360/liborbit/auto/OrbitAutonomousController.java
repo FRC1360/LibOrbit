@@ -6,6 +6,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -15,6 +18,7 @@ public final class OrbitAutonomousController<T> {
     private ArrayList<OrbitAutonomousMode<T>> selection = new ArrayList<>();
     private Map<T, SubsystemController> controllers;
     private ArrayList<Runnable> startNext;
+    private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
     private int done;
 
     public OrbitAutonomousController(OrbitAutonomousMode<T>[] modes, T[] subsystems) {
@@ -56,7 +60,7 @@ public final class OrbitAutonomousController<T> {
 
     private final class EndCommand extends OrbitAutonomousCommand<T> {
         private EndCommand() {
-            super(null);
+            super(null, 0);
         }
 
         @Override
@@ -79,7 +83,7 @@ public final class OrbitAutonomousController<T> {
 
     private final class FinishedCommand extends OrbitAutonomousCommand<T> {
         public FinishedCommand() {
-            super(null);
+            super(null, 0);
         }
 
         @Override
@@ -91,15 +95,25 @@ public final class OrbitAutonomousController<T> {
 
     private final class SubsystemController extends OrbitStateMachine<OrbitAutonomousCommand<T>> {
         private ArrayDeque<OrbitAutonomousCommand<T>> queue;
+        private ScheduledFuture<?> future;
 
         private SubsystemController(ArrayDeque<OrbitAutonomousCommand<T>> queue) {
-            super(new EndCommand());
-            getState().setGotoNextFunc(() -> setState(queue.remove()));
+            super(new FinishedCommand());
+            getState().setGotoNextFunc(this::next);
             for (OrbitAutonomousCommand<T> command : queue)
-                command.setGotoNextFunc(() -> setState(queue.remove()));
-            queue.remove();
+                command.setGotoNextFunc(this::next);
             queue.add(new FinishedCommand());
             this.queue = queue;
+            next();
+        }
+
+        private synchronized void next() {
+            if (future != null)
+                future.cancel(true);
+            OrbitAutonomousCommand<T> command = queue.remove();
+            setState(command);
+            if (command.getTimeout() != 0)
+                future = executor.schedule(this::next, command.getTimeout(), TimeUnit.MILLISECONDS);
         }
     }
 }

@@ -7,8 +7,8 @@ public final class OrbitAutonomousWaitCommand<T> extends OrbitAutonomousCommand<
     private OrbitAutonomousController<T> controller;
     private Thread thread;
 
-    public OrbitAutonomousWaitCommand(T subsystem, T targetSubsystem, OrbitAutonomousController<T> controller) {
-        super(subsystem);
+    public OrbitAutonomousWaitCommand(T subsystem, long timeout, T targetSubsystem, OrbitAutonomousController<T> controller) {
+        super(subsystem, timeout);
         this.targetSubsystem = targetSubsystem;
         this.controller = controller;
     }
