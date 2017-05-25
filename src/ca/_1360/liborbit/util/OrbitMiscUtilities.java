@@ -1,5 +1,8 @@
 package ca._1360.liborbit.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -8,8 +11,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public final class OrbitMiscUtilities {
-    private OrbitMiscUtilities() {
-    }
+    private OrbitMiscUtilities() { }
 
     public static <T> Stream<T> stream(Iterator<T> iterator) {
         return StreamSupport.stream(((Iterable<T>) () -> iterator).spliterator(), false);
@@ -39,5 +41,24 @@ public final class OrbitMiscUtilities {
                 return _next;
             }
         });
+    }
+
+    public static byte[] readBytes(InputStream stream, int count) throws IOException {
+        byte[] bytes = new byte[count];
+        int r = 0;
+        while (r < count)
+            r += stream.read(bytes, r, count - r);
+        return bytes;
+    }
+
+    public static void tryStop(Thread t, String interruptErrorMessage) throws InterruptedIOException {
+        t.interrupt();
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            InterruptedIOException exception = new InterruptedIOException(interruptErrorMessage);
+            exception.addSuppressed(e);
+            throw exception;
+        }
     }
 }
