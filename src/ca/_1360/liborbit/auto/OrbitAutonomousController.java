@@ -1,18 +1,17 @@
 package ca._1360.liborbit.auto;
 
 import ca._1360.liborbit.statemachine.OrbitStateMachine;
+import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class OrbitAutonomousController<T> {
     private OrbitAutonomousMode<T>[] modes;
     private T[] subsystems;
     private ArrayList<OrbitAutonomousMode<T>> selection = new ArrayList<>();
-    private List<SubsystemController> controllers;
+    private Map<T, SubsystemController> controllers;
     private ArrayList<Runnable> startNext;
     private int done;
 
@@ -37,7 +36,7 @@ public final class OrbitAutonomousController<T> {
             map.put(subsystem, new ArrayDeque<>());
         for (OrbitAutonomousMode<T> mode : selection)
             mode.add(c -> map.get(c.getSubsystem()).add(c));
-        controllers = map.values().stream().map(SubsystemController::new).collect(Collectors.toList());
+        controllers = new HashMap<>(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, ((Function<Map.Entry<T, ArrayDeque<OrbitAutonomousCommand<T>>>, ArrayDeque<OrbitAutonomousCommand<T>>>) Map.Entry::getValue).andThen(SubsystemController::new))));
         ArrayList<Runnable> oldNext = startNext;
         startNext = new ArrayList<>();
         done = 0;
@@ -45,8 +44,12 @@ public final class OrbitAutonomousController<T> {
     }
 
     public void stop() {
-        for (SubsystemController controller : controllers)
+        for (SubsystemController controller : controllers.values())
             controller.setState(new FinishedCommand());
+    }
+
+    public void waitFor(T subsystem) throws InterruptedException {
+        controllers.get(subsystem).getState().join();
     }
 
     private final class EndCommand extends OrbitAutonomousCommand<T> {
@@ -55,7 +58,7 @@ public final class OrbitAutonomousController<T> {
         }
 
         @Override
-        public void initialize() {
+        protected void initializeCore() {
             ++done;
             if (done == controllers.size()) {
                 ArrayList<Runnable> oldNext = startNext;
@@ -69,7 +72,7 @@ public final class OrbitAutonomousController<T> {
         }
 
         @Override
-        public void deinitialize() { }
+        protected void deinitializeCore() { }
     }
 
     private final class FinishedCommand extends OrbitAutonomousCommand<T> {
@@ -78,10 +81,10 @@ public final class OrbitAutonomousController<T> {
         }
 
         @Override
-        public void initialize() { }
+        protected void initializeCore() { }
 
         @Override
-        public void deinitialize() { }
+        protected void deinitializeCore() { }
     }
 
     private final class SubsystemController extends OrbitStateMachine<OrbitAutonomousCommand<T>> {

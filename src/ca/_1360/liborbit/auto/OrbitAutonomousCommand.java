@@ -1,10 +1,15 @@
 package ca._1360.liborbit.auto;
 
-import ca._1360.liborbit.statemachine.OrbitStateMachineStates;
+import ca._1360.liborbit.pipeline.OrbitPipelineConnection;
+import ca._1360.liborbit.statemachine.OrbitStateMachineSimpleStates;
 
-public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineStates {
-    private T subsystem;
+import java.util.Collections;
+import java.util.List;
+
+public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineSimpleStates {
+    private final T subsystem;
     private Runnable gotoNextFunc;
+    private boolean running;
 
     public OrbitAutonomousCommand(T subsystem) {
         this.subsystem = subsystem;
@@ -12,6 +17,13 @@ public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineStat
 
     public T getSubsystem() {
         return subsystem;
+    }
+
+    public void join() throws InterruptedException {
+        synchronized (subsystem) {
+            if (running)
+                subsystem.wait();
+        }
     }
 
     public void setGotoNextFunc(Runnable gotoNextFunc) {
@@ -22,9 +34,32 @@ public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineStat
         gotoNextFunc.run();
     }
 
-    @Override
-    public abstract void initialize();
+    protected abstract void initializeCore();
+
+    protected abstract void deinitializeCore();
 
     @Override
-    public abstract void deinitialize();
+    public void initialize() {
+        running = true;
+        initializeCore();
+    }
+
+    @Override
+    public void deinitialize() {
+        deinitializeCore();
+        synchronized (subsystem) {
+            running = false;
+            subsystem.notifyAll();
+        }
+    }
+
+    @Override
+    public List<OrbitPipelineConnection> getConnections() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public List<StateMachineUpdate<?>> getStateUpdates() {
+        return Collections.emptyList();
+    }
 }
