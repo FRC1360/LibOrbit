@@ -243,11 +243,11 @@ public final class OrbitFunctionUtilities {
         return t -> biPredicate.test(t, u);
     }
 
-    public static <T, E extends Throwable> OrbitExceptionalRunnable specializeEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, T t) {
+    public static <T, E extends Throwable> OrbitExceptionalRunnable<E> specializeEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, T t) {
         return () -> consumer.accept(t);
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalRunnable specializeEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, T t, U u) {
+    public static <T, U, E extends Throwable> OrbitExceptionalRunnable<E> specializeEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, T t, U u) {
         return () -> biConsumer.accept(t, u);
     }
 
@@ -339,11 +339,11 @@ public final class OrbitFunctionUtilities {
         return t -> biPredicate.test(t, u.get());
     }
 
-    public static <T, E extends Throwable> OrbitExceptionalRunnable specializeEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, Supplier<T> t) {
+    public static <T, E extends Throwable> OrbitExceptionalRunnable<E> specializeEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, Supplier<T> t) {
         return () -> consumer.accept(t.get());
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalRunnable specializeEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<T> t, Supplier<U> u) {
+    public static <T, U, E extends Throwable> OrbitExceptionalRunnable<E> specializeEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<T> t, Supplier<U> u) {
         return () -> biConsumer.accept(t.get(), u.get());
     }
 
