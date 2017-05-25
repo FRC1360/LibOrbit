@@ -15,7 +15,7 @@ public final class OrbitAutonomousWaitCommand<T> extends OrbitAutonomousCommand<
 
     @Override
     protected void initializeCore() {
-        thread = new Thread(OrbitFunctionUtilities.handleException(OrbitFunctionUtilities.specializeEx(controller::waitFor, targetSubsystem), e -> gotoNext()));
+        thread = new Thread(OrbitFunctionUtilities.combine(OrbitFunctionUtilities.handleException(OrbitFunctionUtilities.specializeEx(controller::waitFor, targetSubsystem), e -> {}), this::gotoNext));
         thread.start();
     }
 
