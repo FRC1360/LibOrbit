@@ -363,6 +363,13 @@ public final class OrbitFunctionUtilities {
         return () -> biPredicate.test(t.get(), u.get());
     }
 
+    public static Runnable combine(Runnable... runnables) {
+        return Arrays.stream(runnables).reduce((a, b) -> () -> {
+            a.run();
+            b.run();
+        }).orElse(() -> {});
+    }
+
     @SafeVarargs
     public static <T> Consumer<T> combine(Consumer<? super T>... consumers) {
         return Arrays.stream(consumers).map(consumer -> (Consumer<T>) consumer::accept).reduce(Consumer::andThen).orElse(t -> {});
@@ -396,6 +403,11 @@ public final class OrbitFunctionUtilities {
     @SafeVarargs
     public static <T, U> BiPredicate<T, U> any(BiPredicate<? super T, ? super U>... biPredicates) {
         return Arrays.stream(biPredicates).map(biPredicate -> (BiPredicate<T, U>) biPredicate::test).reduce(BiPredicate::or).orElse((t, u) -> false);
+    }
+
+    @SafeVarargs
+    public static <E extends Throwable> OrbitExceptionalRunnable<E> combineEx(OrbitExceptionalRunnable<? extends E>... runnables) {
+        return Arrays.stream(runnables).map(runnable -> (OrbitExceptionalRunnable<E>) runnable::run).reduce(OrbitExceptionalRunnable::both).orElse(OrbitExceptionalRunnable.noOp());
     }
 
     @SafeVarargs
