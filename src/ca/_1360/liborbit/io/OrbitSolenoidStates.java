@@ -15,4 +15,8 @@ public enum OrbitSolenoidStates implements OrbitStateMachineStates {
     public boolean isValue() {
         return value;
     }
+
+    public static OrbitSolenoidStates getState(boolean engaged) {
+        return engaged ? SOLENOID_ENGAGED : SOLENOID_DISENGAGED;
+    }
 }
