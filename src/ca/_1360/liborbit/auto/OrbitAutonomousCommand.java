@@ -34,9 +34,11 @@ public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineSimp
         gotoNextFunc.run();
     }
 
-    protected abstract void initializeCore();
+    protected void initializeCore() {
+    }
 
-    protected abstract void deinitializeCore();
+    protected void deinitializeCore() {
+    }
 
     @Override
     public void initialize() {

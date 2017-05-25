@@ -1,9 +1,11 @@
 package ca._1360.liborbit.auto;
 
 import ca._1360.liborbit.statemachine.OrbitStateMachine;
-import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
