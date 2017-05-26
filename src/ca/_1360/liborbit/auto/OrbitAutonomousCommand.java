@@ -8,9 +8,9 @@ import java.util.List;
 
 public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineSimpleStates {
     private final T subsystem;
+    private final long timeout;
     private Runnable gotoNextFunc;
     private boolean running;
-    private long timeout;
 
     public OrbitAutonomousCommand(T subsystem, long timeout) {
         this.subsystem = subsystem;

@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class OrbitAutonomousStateMachineUpdateCommand<T, U extends OrbitStateMachineStates> extends OrbitAutonomousCommand<T> {
-    private StateMachineUpdate<U> update;
+    private final StateMachineUpdate<U> update;
 
     public OrbitAutonomousStateMachineUpdateCommand(T subsystem, OrbitStateMachine<U> stateMachine, U state) {
         super(subsystem, 0);

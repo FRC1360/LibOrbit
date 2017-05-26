@@ -3,8 +3,8 @@ package ca._1360.liborbit.auto;
 import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
 public final class OrbitAutonomousWaitCommand<T> extends OrbitAutonomousCommand<T> {
-    private T targetSubsystem;
-    private OrbitAutonomousController<T> controller;
+    private final T targetSubsystem;
+    private final OrbitAutonomousController<T> controller;
     private Thread thread;
 
     public OrbitAutonomousWaitCommand(T subsystem, long timeout, T targetSubsystem, OrbitAutonomousController<T> controller) {

@@ -14,12 +14,12 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class OrbitAutonomousController<T> {
-    private OrbitAutonomousMode<T>[] modes;
-    private T[] subsystems;
-    private ArrayList<OrbitAutonomousMode<T>> selection = new ArrayList<>();
+    private final OrbitAutonomousMode<T>[] modes;
+    private final T[] subsystems;
+    private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
+    private final ArrayList<OrbitAutonomousMode<T>> selection = new ArrayList<>();
     private Map<T, SubsystemController> controllers;
     private ArrayList<Runnable> startNext;
-    private ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
     private int done;
 
     public OrbitAutonomousController(OrbitAutonomousMode<T>[] modes, T[] subsystems) {
