@@ -363,6 +363,54 @@ public final class OrbitFunctionUtilities {
         return () -> biPredicate.test(t.get(), u.get());
     }
 
+    public static <T, U, V> Consumer<V> source(BiConsumer<? super T, ? super U> biConsumer, Function<? super V, ? extends T> tAdapter, Function<? super V, ? extends U> uAdapter) {
+        return v -> biConsumer.accept(tAdapter.apply(v), uAdapter.apply(v));
+    }
+
+    public static <T, U, V, W> BiConsumer<V, W> source(BiConsumer<? super T, ? super U> biConsumer, BiFunction<? super V, ? super W, ? extends T> tAdapter, BiFunction<? super V, ? super W, ? extends U> uAdapter) {
+        return (v, w) -> biConsumer.accept(tAdapter.apply(v, w), uAdapter.apply(v, w));
+    }
+
+    public static <T, U, V, R> Function<V, R> source(BiFunction<? super T, ? super U, ? extends R> biFunction, Function<? super V, ? extends T> tAdapter, Function<? super V, ? extends U> uAdapter) {
+        return v -> biFunction.apply(tAdapter.apply(v), uAdapter.apply(v));
+    }
+
+    public static <T, U, V, W, R> BiFunction<V, W, R> source(BiFunction<? super T, ? super U, ? extends R> biFunction, BiFunction<? super V, ? super W, ? extends T> tAdapter, BiFunction<? super V, ? super W, ? extends U> uAdapter) {
+        return (v, w) -> biFunction.apply(tAdapter.apply(v, w), uAdapter.apply(v, w));
+    }
+
+    public static <T, U, V> Predicate<V> source(BiPredicate<? super T, ? super U> biPredicate, Function<? super V, ? extends T> tAdapter, Function<? super V, ? extends U> uAdapter) {
+        return v -> biPredicate.test(tAdapter.apply(v), uAdapter.apply(v));
+    }
+
+    public static <T, U, V, W> BiPredicate<V, W> source(BiPredicate<? super T, ? super U> biPredicate, BiFunction<? super V, ? super W, ? extends T> tAdapter, BiFunction<? super V, ? super W, ? extends U> uAdapter) {
+        return (v, w) -> biPredicate.test(tAdapter.apply(v, w), uAdapter.apply(v, w));
+    }
+
+    public static <T, U, V, E extends Throwable> OrbitExceptionalConsumer<V, E> sourceEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, OrbitExceptionalFunction<? super V, ? extends T, ? extends E> tAdapter, OrbitExceptionalFunction<? super V, ? extends U, ? extends E> uAdapter) {
+        return v -> biConsumer.accept(tAdapter.apply(v), uAdapter.apply(v));
+    }
+
+    public static <T, U, V, W, E extends Throwable> OrbitExceptionalBiConsumer<V, W, E> sourceEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, OrbitExceptionalBiFunction<? super V, ? super W, ? extends T, ? extends E> tAdapter, OrbitExceptionalBiFunction<? super V, ? super W, ? extends U, ? extends E> uAdapter) {
+        return (v, w) -> biConsumer.accept(tAdapter.apply(v, w), uAdapter.apply(v, w));
+    }
+
+    public static <T, U, V, R, E extends Throwable> OrbitExceptionalFunction<V, R, E> sourceEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, OrbitExceptionalFunction<? super V, ? extends T, ? extends E> tAdapter, OrbitExceptionalFunction<? super V, ? extends U, ? extends E> uAdapter) {
+        return v -> biFunction.apply(tAdapter.apply(v), uAdapter.apply(v));
+    }
+
+    public static <T, U, V, W, R, E extends Throwable> OrbitExceptionalBiFunction<V, W, R, E> sourceEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, OrbitExceptionalBiFunction<? super V, ? super W, ? extends T, ? extends E> tAdapter, OrbitExceptionalBiFunction<? super V, ? super W, ? extends U, ? extends E> uAdapter) {
+        return (v, w) -> biFunction.apply(tAdapter.apply(v, w), uAdapter.apply(v, w));
+    }
+
+    public static <T, U, V, E extends Throwable> OrbitExceptionalPredicate<V, E> sourceEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, OrbitExceptionalFunction<? super V, ? extends T, ? extends E> tAdapter, OrbitExceptionalFunction<? super V, ? extends U, ? extends E> uAdapter) {
+        return v -> biPredicate.test(tAdapter.apply(v), uAdapter.apply(v));
+    }
+
+    public static <T, U, V, W, E extends Throwable> OrbitExceptionalBiPredicate<V, W, E> sourceEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, OrbitExceptionalBiFunction<? super V, ? super W, ? extends T, ? extends E> tAdapter, OrbitExceptionalBiFunction<? super V, ? super W, ? extends U, ? extends E> uAdapter) {
+        return (v, w) -> biPredicate.test(tAdapter.apply(v, w), uAdapter.apply(v, w));
+    }
+
     public static Runnable combine(Runnable... runnables) {
         return Arrays.stream(runnables).reduce((a, b) -> () -> {
             a.run();
