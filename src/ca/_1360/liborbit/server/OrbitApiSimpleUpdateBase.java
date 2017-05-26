@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.function.IntFunction;
 
 public abstract class OrbitApiSimpleUpdateBase implements OrbitApiUpdate {
-    private int channel;
+    private final int channel;
     private byte[] payload;
 
     public OrbitApiSimpleUpdateBase(int channel) {

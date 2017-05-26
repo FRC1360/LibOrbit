@@ -19,13 +19,13 @@ import java.util.OptionalDouble;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public final class OrbitApiServer implements Closeable {
-    private ServerSocket serverSocket;
-    private HashMap<String, InputEndpoint> inputs = new HashMap<>();
-    private HashMap<String, OutputEndpoint> outputs = new HashMap<>();
-    private LinkedBlockingQueue<OrbitApiUpdate> updateQueue = new LinkedBlockingQueue<>();
-    private ArrayList<OrbitApiClient> connections = new ArrayList<>();
-    private Thread acceptThread;
-    private Thread processThread;
+    private final ServerSocket serverSocket;
+    private final HashMap<String, InputEndpoint> inputs = new HashMap<>();
+    private final HashMap<String, OutputEndpoint> outputs = new HashMap<>();
+    private final LinkedBlockingQueue<OrbitApiUpdate> updateQueue = new LinkedBlockingQueue<>();
+    private final ArrayList<OrbitApiClient> connections = new ArrayList<>();
+    private final Thread acceptThread;
+    private final Thread processThread;
 
     public OrbitApiServer(int port) throws IOException {
         serverSocket = new ServerSocket(port);

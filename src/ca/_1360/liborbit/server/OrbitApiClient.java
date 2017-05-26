@@ -10,10 +10,10 @@ import java.util.HashMap;
 import java.util.function.Function;
 
 public final class OrbitApiClient implements Closeable {
-    private OrbitApiServer server;
-    private Socket socket;
-    private OrbitMultiChannelStream mcs;
-    private HashMap<Integer, DataOutputStream> dataOutputStreamMap = new HashMap<>();
+    private final OrbitApiServer server;
+    private final Socket socket;
+    private final OrbitMultiChannelStream mcs;
+    private final HashMap<Integer, DataOutputStream> dataOutputStreamMap = new HashMap<>();
 
     OrbitApiClient(OrbitApiServer server, Socket socket) throws IOException {
         this.server = server;
