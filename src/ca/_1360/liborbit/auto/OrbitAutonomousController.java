@@ -1,14 +1,15 @@
 package ca._1360.liborbit.auto;
 
 import ca._1360.liborbit.statemachine.OrbitStateMachine;
+import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,11 +38,8 @@ public final class OrbitAutonomousController<T> {
     public void start() {
         done = -1;
         startNext = new ArrayList<>();
-        HashMap<T, ArrayDeque<OrbitAutonomousCommand<T>>> map = new HashMap<>();
-        for (T subsystem : subsystems)
-            map.put(subsystem, new ArrayDeque<>());
-        for (OrbitAutonomousMode<T> mode : selection)
-            mode.add(c -> map.get(c.getSubsystem()).add(c));
+        Map<T, ArrayDeque<OrbitAutonomousCommand<T>>> map = Arrays.stream(subsystems).collect(Collectors.toMap(Function.identity(), t -> new ArrayDeque<>(Collections.singleton(new EndCommand()))));
+        selection.forEach(OrbitFunctionUtilities.specializeSecond((BiConsumer<OrbitAutonomousMode<T>, Consumer<OrbitAutonomousCommand<T>>>) OrbitAutonomousMode::add, c -> map.get(c.getSubsystem()).add(c)));
         controllers = new HashMap<>(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, ((Function<Map.Entry<T, ArrayDeque<OrbitAutonomousCommand<T>>>, ArrayDeque<OrbitAutonomousCommand<T>>>) Map.Entry::getValue).andThen(SubsystemController::new))));
         ArrayList<Runnable> oldNext = startNext;
         startNext = new ArrayList<>();
@@ -50,8 +48,7 @@ public final class OrbitAutonomousController<T> {
     }
 
     public void stop() {
-        for (SubsystemController controller : controllers.values())
-            controller.setState(new FinishedCommand());
+        controllers.values().forEach(OrbitFunctionUtilities.specializeSecondSupplier(SubsystemController::setState, FinishedCommand::new));
     }
 
     public void waitFor(T subsystem) throws InterruptedException {
@@ -99,21 +96,21 @@ public final class OrbitAutonomousController<T> {
 
         private SubsystemController(ArrayDeque<OrbitAutonomousCommand<T>> queue) {
             super(new FinishedCommand());
-            getState().setGotoNextFunc(this::next);
-            for (OrbitAutonomousCommand<T> command : queue)
-                command.setGotoNextFunc(this::next);
+            queue.forEach(OrbitFunctionUtilities.source((BiConsumer<OrbitAutonomousCommand<T>, Runnable>) OrbitAutonomousCommand::setGotoNextFunc, Function.identity(), OrbitFunctionUtilities.specializeFirst((BiFunction<Consumer<OrbitAutonomousCommand<T>>, OrbitAutonomousCommand<T>, Runnable>) OrbitFunctionUtilities::specialize, this::next)));
             queue.add(new FinishedCommand());
             this.queue = queue;
-            next();
+            next(null);
         }
 
-        private synchronized void next() {
+        private synchronized void next(OrbitAutonomousCommand<T> last) {
+            if (last != null && getState() != last)
+                return;
             if (future != null)
                 future.cancel(true);
             OrbitAutonomousCommand<T> command = queue.remove();
             setState(command);
             if (command.getTimeout() != 0)
-                future = executor.schedule(this::next, command.getTimeout(), TimeUnit.MILLISECONDS);
+                future = executor.schedule(OrbitFunctionUtilities.specialize(this::next, command), command.getTimeout(), TimeUnit.MILLISECONDS);
         }
     }
 }
