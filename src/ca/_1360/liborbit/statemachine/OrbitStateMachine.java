@@ -5,7 +5,7 @@ import java.util.function.BiConsumer;
 
 public class OrbitStateMachine<T extends OrbitStateMachineStates> {
     private T state;
-    private ArrayList<BiConsumer<T, T>> handlers = new ArrayList<>();
+    private final ArrayList<BiConsumer<T, T>> handlers = new ArrayList<>();
 
     public OrbitStateMachine(T state) {
         this.state = state;

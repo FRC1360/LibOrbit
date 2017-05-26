@@ -33,8 +33,8 @@ public interface OrbitStateMachineSimpleStates extends OrbitStateMachineStates {
     }
 
     final class StateMachineUpdate<T extends OrbitStateMachineStates> {
-        private OrbitStateMachine<T> stateMachine;
-        private T state;
+        private final OrbitStateMachine<T> stateMachine;
+        private final T state;
         private T lastState;
 
         public StateMachineUpdate(OrbitStateMachine<T> stateMachine, T state) {
