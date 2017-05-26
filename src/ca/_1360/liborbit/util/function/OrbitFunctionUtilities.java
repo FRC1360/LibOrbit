@@ -267,99 +267,99 @@ public final class OrbitFunctionUtilities {
         return () -> biPredicate.test(t, u);
     }
 
-    public static <T, U> Consumer<U> specializeFirst(BiConsumer<? super T, ? super U> biConsumer, Supplier<T> t) {
+    public static <T, U> Consumer<U> specializeFirstSupplier(BiConsumer<? super T, ? super U> biConsumer, Supplier<T> t) {
         return u -> biConsumer.accept(t.get(), u);
     }
 
-    public static <T, U> Consumer<T> specializeSecond(BiConsumer<? super T, ? super U> biConsumer, Supplier<U> u) {
+    public static <T, U> Consumer<T> specializeSecondSupplier(BiConsumer<? super T, ? super U> biConsumer, Supplier<U> u) {
         return t -> biConsumer.accept(t, u.get());
     }
 
-    public static <T, U, R> Function<U, R> specializeFirst(BiFunction<? super T, ? super U, ? extends R> biFunction, Supplier<T> t) {
+    public static <T, U, R> Function<U, R> specializeFirstSupplier(BiFunction<? super T, ? super U, ? extends R> biFunction, Supplier<T> t) {
         return u -> biFunction.apply(t.get(), u);
     }
 
-    public static <T, U, R> Function<T, R> specializeSecond(BiFunction<? super T, ? super U, ? extends R> biFunction, Supplier<U> u) {
+    public static <T, U, R> Function<T, R> specializeSecondSupplier(BiFunction<? super T, ? super U, ? extends R> biFunction, Supplier<U> u) {
         return t -> biFunction.apply(t, u.get());
     }
 
-    public static <T, U> Predicate<U> specializeFirst(BiPredicate<? super T, ? super U> biPredicate, Supplier<T> t) {
+    public static <T, U> Predicate<U> specializeFirstSupplier(BiPredicate<? super T, ? super U> biPredicate, Supplier<T> t) {
         return u -> biPredicate.test(t.get(), u);
     }
 
-    public static <T, U> Predicate<T> specializeSecond(BiPredicate<? super T, ? super U> biPredicate, Supplier<U> u) {
+    public static <T, U> Predicate<T> specializeSecondSupplier(BiPredicate<? super T, ? super U> biPredicate, Supplier<U> u) {
         return t -> biPredicate.test(t, u.get());
     }
 
-    public static <T> Runnable specialize(Consumer<? super T> consumer, Supplier<T> t) {
+    public static <T> Runnable specializeSupplier(Consumer<? super T> consumer, Supplier<T> t) {
         return () -> consumer.accept(t.get());
     }
 
-    public static <T, U> Runnable specialize(BiConsumer<? super T, ? super U> biConsumer, Supplier<T> t, Supplier<U> u) {
+    public static <T, U> Runnable specializeSupplier(BiConsumer<? super T, ? super U> biConsumer, Supplier<T> t, Supplier<U> u) {
         return () -> biConsumer.accept(t.get(), u.get());
     }
 
-    public static <T, R> Supplier<R> specialize(Function<? super T, ? extends R> function, Supplier<T> t) {
+    public static <T, R> Supplier<R> specializeSupplier(Function<? super T, ? extends R> function, Supplier<T> t) {
         return () -> function.apply(t.get());
     }
 
-    public static <T, U, R> Supplier<R> specialize(BiFunction<? super T, ? super U, ? extends R> biFunction, Supplier<T> t, Supplier<U> u) {
+    public static <T, U, R> Supplier<R> specializeSupplier(BiFunction<? super T, ? super U, ? extends R> biFunction, Supplier<T> t, Supplier<U> u) {
         return () -> biFunction.apply(t.get(), u.get());
     }
 
-    public static <T> BooleanSupplier specialize(Predicate<? super T> predicate, Supplier<T> t) {
+    public static <T> BooleanSupplier specializeSupplier(Predicate<? super T> predicate, Supplier<T> t) {
         return () -> predicate.test(t.get());
     }
 
-    public static <T, U> BooleanSupplier specialize(BiPredicate<? super T, ? super U> biPredicate, Supplier<T> t, Supplier<U> u) {
+    public static <T, U> BooleanSupplier specializeSupplier(BiPredicate<? super T, ? super U> biPredicate, Supplier<T> t, Supplier<U> u) {
         return () -> biPredicate.test(t.get(), u.get());
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalConsumer<U, E> specializeFirstEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<T> t) {
+    public static <T, U, E extends Throwable> OrbitExceptionalConsumer<U, E> specializeFirstSupplierEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<T> t) {
         return u -> biConsumer.accept(t.get(), u);
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalConsumer<T, E> specializeSecondEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<U> u) {
+    public static <T, U, E extends Throwable> OrbitExceptionalConsumer<T, E> specializeSecondSupplierEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<U> u) {
         return t -> biConsumer.accept(t, u.get());
     }
 
-    public static <T, U, R, E extends Throwable> OrbitExceptionalFunction<U, R, E> specializeFirstEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, Supplier<T> t) {
+    public static <T, U, R, E extends Throwable> OrbitExceptionalFunction<U, R, E> specializeFirstSupplierEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, Supplier<T> t) {
         return u -> biFunction.apply(t.get(), u);
     }
 
-    public static <T, U, R, E extends Throwable> OrbitExceptionalFunction<T, R, E> specializeSecondEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, Supplier<U> u) {
+    public static <T, U, R, E extends Throwable> OrbitExceptionalFunction<T, R, E> specializeSecondSupplierEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, Supplier<U> u) {
         return t -> biFunction.apply(t, u.get());
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalPredicate<U, E> specializeFirstEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<T> t) {
+    public static <T, U, E extends Throwable> OrbitExceptionalPredicate<U, E> specializeFirstSupplierEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<T> t) {
         return u -> biPredicate.test(t.get(), u);
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalPredicate<T, E> specializeSecondEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<U> u) {
+    public static <T, U, E extends Throwable> OrbitExceptionalPredicate<T, E> specializeSecondSupplierEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<U> u) {
         return t -> biPredicate.test(t, u.get());
     }
 
-    public static <T, E extends Throwable> OrbitExceptionalRunnable<E> specializeEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, Supplier<T> t) {
+    public static <T, E extends Throwable> OrbitExceptionalRunnable<E> specializeSupplierEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, Supplier<T> t) {
         return () -> consumer.accept(t.get());
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalRunnable<E> specializeEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<T> t, Supplier<U> u) {
+    public static <T, U, E extends Throwable> OrbitExceptionalRunnable<E> specializeSupplierEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, Supplier<T> t, Supplier<U> u) {
         return () -> biConsumer.accept(t.get(), u.get());
     }
 
-    public static <T, R, E extends Throwable> OrbitExceptionalSupplier<R, E> specializeEx(OrbitExceptionalFunction<? super T, ? extends R, ? extends E> function, Supplier<T> t) {
+    public static <T, R, E extends Throwable> OrbitExceptionalSupplier<R, E> specializeSupplierEx(OrbitExceptionalFunction<? super T, ? extends R, ? extends E> function, Supplier<T> t) {
         return () -> function.apply(t.get());
     }
 
-    public static <T, U, R, E extends Throwable> OrbitExceptionalSupplier<R, E> specializeEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, Supplier<T> t, Supplier<U> u) {
+    public static <T, U, R, E extends Throwable> OrbitExceptionalSupplier<R, E> specializeSupplierEx(OrbitExceptionalBiFunction<? super T, ? super U, ? extends R, ? extends E> biFunction, Supplier<T> t, Supplier<U> u) {
         return () -> biFunction.apply(t.get(), u.get());
     }
 
-    public static <T, E extends Throwable> OrbitExceptionalSupplier<Boolean, E> specializeEx(OrbitExceptionalPredicate<? super T, ? extends E> predicate, Supplier<T> t) {
+    public static <T, E extends Throwable> OrbitExceptionalSupplier<Boolean, E> specializeSupplierEx(OrbitExceptionalPredicate<? super T, ? extends E> predicate, Supplier<T> t) {
         return () -> predicate.test(t.get());
     }
 
-    public static <T, U, E extends Throwable> OrbitExceptionalSupplier<Boolean, E> specializeEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<T> t, Supplier<U> u) {
+    public static <T, U, E extends Throwable> OrbitExceptionalSupplier<Boolean, E> specializeSupplierEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<T> t, Supplier<U> u) {
         return () -> biPredicate.test(t.get(), u.get());
     }
 
