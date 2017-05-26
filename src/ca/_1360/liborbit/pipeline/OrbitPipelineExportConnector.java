@@ -4,8 +4,8 @@ import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
 
 public final class OrbitPipelineExportConnector<T> implements OrbitPipelineInputEndpoint {
-    private DoubleFunction<T> function;
-    private Consumer<T> target;
+    private final DoubleFunction<T> function;
+    private final Consumer<T> target;
 
     public OrbitPipelineExportConnector(DoubleFunction<T> function, Consumer<T> target) {
         this.function = function;

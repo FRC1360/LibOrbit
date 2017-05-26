@@ -3,7 +3,7 @@ package ca._1360.liborbit.pipeline;
 import java.util.OptionalDouble;
 
 public abstract class OrbitPipelineComplexNodeBase {
-    private boolean updateIfNoValues;
+    private final boolean updateIfNoValues;
     private int count;
     private int updated;
     private boolean values;
@@ -56,7 +56,7 @@ public abstract class OrbitPipelineComplexNodeBase {
 
     protected final class OutputEndpoint implements OrbitPipelineOutputEndpoint {
         private double value;
-        private boolean alwaysProvideValue;
+        private final boolean alwaysProvideValue;
         private boolean newValue;
 
         public OutputEndpoint(double value, boolean alwaysProvideValue) {

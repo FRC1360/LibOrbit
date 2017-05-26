@@ -1,8 +1,8 @@
 package ca._1360.liborbit.pipeline;
 
 public final class OrbitPipelineConnection {
-    private OrbitPipelineOutputEndpoint source;
-    private OrbitPipelineInputEndpoint destination;
+    private final OrbitPipelineOutputEndpoint source;
+    private final OrbitPipelineInputEndpoint destination;
     private boolean enabled;
 
     public OrbitPipelineConnection(OrbitPipelineOutputEndpoint source, OrbitPipelineInputEndpoint destination, boolean enabled) throws OrbitPipelineInvalidConfigurationException {
