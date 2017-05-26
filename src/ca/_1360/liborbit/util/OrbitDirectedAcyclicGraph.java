@@ -1,14 +1,15 @@
 package ca._1360.liborbit.util;
 
+import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
+
 import java.util.*;
-import java.util.function.BiPredicate;
-import java.util.function.Predicate;
+import java.util.function.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     private LinkedList<T> objects = new LinkedList<>();
-    private ArrayList<Relationship> relationships = new ArrayList<>();
+    private final ArrayList<Relationship> relationships = new ArrayList<>();
 
     @Override
     public final Iterator<T> iterator() {
@@ -25,7 +26,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
 
     public synchronized final void add(T object, Iterable<T> from, Iterable<T> to) throws BatchOperationException {
         objects.add(object);
-        runBatch(Stream.concat(Stream.of(addOp(object)), Stream.concat(StreamSupport.stream(from.spliterator(), false).map(o -> createRelationshipOp(o, object)), StreamSupport.stream(to.spliterator(), false).map(o -> createRelationshipOp(object, o))))::iterator);
+        runBatch(Stream.concat(Stream.of(addOp(object)), Stream.concat(StreamSupport.stream(from.spliterator(), false).map(OrbitFunctionUtilities.specializeSecond(this::createRelationshipOp, object)), StreamSupport.stream(to.spliterator(), false).map(OrbitFunctionUtilities.specializeFirst(this::createRelationshipOp, object))))::iterator);
     }
 
     public synchronized final void remove(T object) {
@@ -53,10 +54,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     public synchronized final void runBatch(Iterable<BatchOperation> operations) throws BatchOperationException {
         Stack<BatchOperation> done = new Stack<>();
         try {
-            for (BatchOperation operation : operations) {
-                operation.run();
-                done.push(operation);
-            }
+            operations.forEach(OrbitFunctionUtilities.combine(BatchOperation::run, done::push));
             invalidate();
         } catch (Throwable t) {
             while (!done.empty())
@@ -73,8 +71,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
 
     protected final void invalidate() throws OrbitDirectedCycleException {
         HashMap<T, ArrayList<T>> incomingMap = new HashMap<>();
-        for (Relationship relationship : relationships)
-            incomingMap.computeIfAbsent(relationship.getTo(), e -> new ArrayList<>()).add(relationship.getFrom());
+        relationships.forEach(OrbitFunctionUtilities.source((BiConsumer<ArrayList<T>, T>) ArrayList::add, OrbitFunctionUtilities.<T, Function<T, ArrayList<T>>, ArrayList<T>>specializeSecond(incomingMap::computeIfAbsent, e -> new ArrayList<>()).compose(Relationship::getTo), Relationship::getFrom));
         ArrayDeque<T> noEdges = new ArrayDeque<>();
         objects.stream().filter(((Predicate<T>) incomingMap::containsKey).negate()).forEach(noEdges::add);
         LinkedList<T> list = new LinkedList<>();
@@ -95,7 +92,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     }
 
     public final BatchOperation addOp(T object) {
-        return new BatchOperation(() -> objects.add(object), () -> objects.remove(object));
+        return new BatchOperation(OrbitFunctionUtilities.specialize((Consumer<T>) objects::add, object), OrbitFunctionUtilities.specialize((Consumer<T>) objects::remove, object));
     }
 
     public final BatchOperation removeOp(T object) {
@@ -104,11 +101,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
         return new BatchOperation(() -> {
             pos.setValue(objects.indexOf(object));
             objects.remove(pos.getValue().intValue());
-            for (Relationship relationship : relationships)
-                if (relationship.getFrom() == object || relationship.getTo() == object) {
-                    relationships.remove(relationship);
-                    removed.add(relationship);
-                }
+            relationships.forEach(OrbitFunctionUtilities.conditional(OrbitFunctionUtilities.combine(relationships::remove, removed::add), relationship -> relationship.getFrom() == object || relationship.getTo() == object));
         }, () -> {
             objects.add(pos.getValue(), object);
             relationships.addAll(removed);
@@ -117,7 +110,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
 
     public final BatchOperation createRelationshipOp(T from, T to) {
         OrbitContainer<Relationship> rel = new OrbitContainer<>(null);
-        return new BatchOperation(() -> rel.setValue(createRelationshipCore(from, to)), () -> relationships.remove(rel.getValue()));
+        return new BatchOperation(OrbitFunctionUtilities.specializeSupplier(rel::setValue, OrbitFunctionUtilities.specialize(this::createRelationshipCore, from, to)), OrbitFunctionUtilities.specializeSupplier((Consumer<Relationship>) relationships::remove, rel::getValue));
     }
 
     public final BatchOperation destroyRelationshipOp(Relationship relationship) {
@@ -125,7 +118,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
         return new BatchOperation(() -> {
             pos.setValue(relationships.indexOf(relationship));
             relationships.remove(pos.getValue().intValue());
-        }, () -> relationships.add(pos.getValue(), relationship));
+        }, OrbitFunctionUtilities.specializeSupplier(OrbitFunctionUtilities.specializeSecond((BiConsumer<Integer, Relationship>) relationships::add, relationship), pos::getValue));
     }
 
     public final BatchOperation predicateOp(BiPredicate<Set<T>, Set<Relationship>> predicate) {
@@ -135,8 +128,8 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     }
 
     public final class Relationship {
-        private T from;
-        private T to;
+        private final T from;
+        private final T to;
 
         private Relationship(T from, T to) {
             this.from = from;
@@ -159,7 +152,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     }
 
     public final class BatchOperation {
-        private Runnable operation, undoOp;
+        private final Runnable operation, undoOp;
 
         public BatchOperation(Runnable operation, Runnable undoOp) {
             this.operation = operation;

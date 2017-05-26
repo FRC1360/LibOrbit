@@ -2,6 +2,8 @@ package ca._1360.liborbit.util;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineComplexNodeBase;
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
+import ca._1360.liborbit.util.function.OrbitExceptionalBiConsumer;
+import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
@@ -11,8 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public final class OrbitLogController extends OrbitPipelineComplexNodeBase {
-    private ArrayList<OutputStream> outputs = new ArrayList<>();
-    private HashMap<String, InputEndpoint> fields = new HashMap<>();
+    private final ArrayList<OutputStream> outputs = new ArrayList<>();
+    private final HashMap<String, InputEndpoint> fields = new HashMap<>();
 
     public OrbitLogController() {
         super(true);
@@ -58,12 +60,7 @@ public final class OrbitLogController extends OrbitPipelineComplexNodeBase {
                 e.printStackTrace();
             }
             byte[] bytes = buffer.toByteArray();
-            for (OutputStream output : outputs)
-                try {
-                    output.write(bytes);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            outputs.forEach(OrbitFunctionUtilities.specializeSecond(OrbitFunctionUtilities.handleException((OrbitExceptionalBiConsumer<OutputStream, byte[], IOException>) OutputStream::write, Throwable::printStackTrace), bytes));
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -1,5 +1,7 @@
 package ca._1360.liborbit.util;
 
+import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InterruptedIOException;
@@ -7,6 +9,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -46,7 +49,7 @@ public final class OrbitMiscUtilities {
 
     @SafeVarargs
     public static <T> Stream<T> concat(Stream<? extends T>... streams) {
-        return Arrays.stream(streams).map(stream -> stream.map(o -> (T) o)).reduce(Stream::concat).orElse(Stream.empty());
+        return Arrays.stream(streams).map(OrbitFunctionUtilities.<Stream<? extends T>, Function<? super T, T>, Stream<T>>specializeSecond(Stream::map, Function.<T>identity())).reduce(Stream::concat).orElse(Stream.empty());
     }
 
     public static byte[] readBytes(InputStream stream, int count) throws IOException {

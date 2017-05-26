@@ -12,18 +12,18 @@ import java.util.Arrays;
 import java.util.Collections;
 
 public final class OrbitPid {
-    private OrbitBinaryOperatorNode error = new OrbitBinaryOperatorNode(true, (x, y) -> x - y);
-    private OrbitBinaryOperatorNode pScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
-    private OrbitBinaryOperatorNode iScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
-    private OrbitBinaryOperatorNode dScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
-    private OrbitIdentityFilter inner = new OrbitIdentityFilter();
-    private OrbitIdentityFilter outer = new OrbitIdentityFilter();
-    private OrbitIntegrationFilter integral = new OrbitIntegrationFilter();
-    private OrbitDerivationFilter derivative = new OrbitDerivationFilter();
-    private OrbitBinaryOperatorNode addMain = new OrbitBinaryOperatorNode(true, (x, y) -> x + y);
-    private OrbitBinaryOperatorNode addID = new OrbitBinaryOperatorNode(true, (x, y) -> x + y);
-    private OrbitUnaryOperatorFilter absError = new OrbitUnaryOperatorFilter(Math::abs);
-    private OrbitSimpleStateMachine<OrbitStateMachineSimpleStates> integralControlStateMachine;
+    private final OrbitBinaryOperatorNode error = new OrbitBinaryOperatorNode(true, (x, y) -> x - y);
+    private final OrbitBinaryOperatorNode pScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
+    private final OrbitBinaryOperatorNode iScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
+    private final OrbitBinaryOperatorNode dScale = new OrbitBinaryOperatorNode(true, (x, y) -> x * y);
+    private final OrbitIdentityFilter inner = new OrbitIdentityFilter();
+    private final OrbitIdentityFilter outer = new OrbitIdentityFilter();
+    private final OrbitIntegrationFilter integral = new OrbitIntegrationFilter();
+    private final OrbitDerivationFilter derivative = new OrbitDerivationFilter();
+    private final OrbitBinaryOperatorNode addMain = new OrbitBinaryOperatorNode(true, (x, y) -> x + y);
+    private final OrbitBinaryOperatorNode addID = new OrbitBinaryOperatorNode(true, (x, y) -> x + y);
+    private final OrbitUnaryOperatorFilter absError = new OrbitUnaryOperatorFilter(Math::abs);
+    private final OrbitSimpleStateMachine<OrbitStateMachineSimpleStates> integralControlStateMachine;
 
     public OrbitPid(double kP, double kI, double kD, double kIInner, double kIOuter, double target) {
         pScale.getInput2().accept(kP);
@@ -53,7 +53,7 @@ public final class OrbitPid {
                     OrbitPipelineManager.enableOp(new OrbitPipelineConnection(absError, new OrbitPipelineExportConnector<>(e -> e >= inner.get().orElse(0.0) && e <= outer.get().orElse(Double.POSITIVE_INFINITY) ? enabled : disabled, integralControlStateMachine::setState), false))
             });
         } catch (OrbitPipelineInvalidConfigurationException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
