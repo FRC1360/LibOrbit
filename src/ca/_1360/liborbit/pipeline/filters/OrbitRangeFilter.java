@@ -17,6 +17,14 @@ public final class OrbitRangeFilter extends OrbitSimplePipelineFilter {
         return max;
     }
 
+    public void setMin(double min) {
+        this.min = min;
+    }
+
+    public void setMax(double max) {
+        this.max = max;
+    }
+
     @Override
     protected double calculateCore(double input) {
         return input < min ? min : input > max ? max : input;

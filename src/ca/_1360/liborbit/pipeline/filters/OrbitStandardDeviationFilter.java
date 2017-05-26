@@ -6,12 +6,20 @@ import java.util.OptionalDouble;
 public final class OrbitStandardDeviationFilter extends OrbitPipelineFilter {
     private double nStdDev;
     private int index;
-    private double[] values;
+    private final double[] values;
 
     public OrbitStandardDeviationFilter(double nStdDev, int nValues) {
         this.nStdDev = nStdDev;
         index = -nValues;
         values = new double[nValues];
+    }
+
+    public double getNStdDev() {
+        return nStdDev;
+    }
+
+    public void setNStdDev(double nStdDev) {
+        this.nStdDev = nStdDev;
     }
 
     @Override
