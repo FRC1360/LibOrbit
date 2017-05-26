@@ -6,7 +6,7 @@ public enum OrbitSolenoidStates implements OrbitStateMachineStates {
     SOLENOID_ENGAGED(true),
     SOLENOID_DISENGAGED(false);
 
-    private boolean value;
+    private final boolean value;
 
     OrbitSolenoidStates(boolean value) {
         this.value = value;
