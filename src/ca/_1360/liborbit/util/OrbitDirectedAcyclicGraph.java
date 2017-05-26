@@ -161,7 +161,7 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     public final class BatchOperation {
         private Runnable operation, undoOp;
 
-        private BatchOperation(Runnable operation, Runnable undoOp) {
+        public BatchOperation(Runnable operation, Runnable undoOp) {
             this.operation = operation;
             this.undoOp = undoOp;
         }

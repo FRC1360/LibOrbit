@@ -3,6 +3,7 @@ package ca._1360.liborbit.statemachine;
 import ca._1360.liborbit.pipeline.OrbitPipelineConnection;
 import ca._1360.liborbit.pipeline.OrbitPipelineInvalidConfigurationException;
 import ca._1360.liborbit.pipeline.OrbitPipelineManager;
+import ca._1360.liborbit.util.OrbitMiscUtilities;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -19,9 +20,7 @@ public class OrbitSimpleStateMachine<T extends OrbitStateMachineSimpleStates> ex
         List<OrbitPipelineConnection> disable = oldState.getConnections();
         List<OrbitPipelineConnection> enable = newState.getConnections();
         try {
-            OrbitPipelineManager.runBatch(disable.stream().filter(((Predicate<OrbitPipelineConnection>) enable::contains).negate()).map(OrbitPipelineManager::disableOp).toArray(OrbitPipelineManager.BatchOperation[]::new));
-            newState.getStateUpdates().forEach(OrbitStateMachineSimpleStates.StateMachineUpdate::update);
-            OrbitPipelineManager.runBatch(enable.stream().filter(((Predicate<OrbitPipelineConnection>) disable::contains).negate()).map(OrbitPipelineManager::enableOp).toArray(OrbitPipelineManager.BatchOperation[]::new));
+            OrbitPipelineManager.runBatch(OrbitMiscUtilities.concat(disable.stream().filter(((Predicate<OrbitPipelineConnection>) enable::contains).negate()).map(OrbitPipelineManager::disableOp), newState.getStateUpdates().stream().map(update -> OrbitPipelineManager.miscOp(update::update, update::undo)), enable.stream().filter(((Predicate<OrbitPipelineConnection>) disable::contains).negate()).map(OrbitPipelineManager::enableOp)).toArray(OrbitPipelineManager.BatchOperation[]::new));
             return true;
         } catch (OrbitPipelineInvalidConfigurationException e) {
             e.printStackTrace();

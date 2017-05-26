@@ -65,6 +65,10 @@ public final class OrbitPipelineManager {
         return new BatchOperation(Collections.singletonList(connections.removeOp(connection)));
     }
 
+    public static BatchOperation miscOp(Runnable operation, Runnable undoOp) {
+        return new BatchOperation(Collections.singletonList(connections.new BatchOperation(operation, undoOp)));
+    }
+
     public static final class BatchOperation {
         private List<OrbitDirectedAcyclicGraph<OrbitPipelineConnection>.BatchOperation> operations;
 

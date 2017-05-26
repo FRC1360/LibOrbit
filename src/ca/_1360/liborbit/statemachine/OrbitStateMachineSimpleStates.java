@@ -3,7 +3,6 @@ package ca._1360.liborbit.statemachine;
 import ca._1360.liborbit.pipeline.OrbitPipelineConnection;
 
 import java.util.List;
-import java.util.Map;
 
 public interface OrbitStateMachineSimpleStates extends OrbitStateMachineStates {
     List<OrbitPipelineConnection> getConnections();
@@ -36,6 +35,7 @@ public interface OrbitStateMachineSimpleStates extends OrbitStateMachineStates {
     final class StateMachineUpdate<T extends OrbitStateMachineStates> {
         private OrbitStateMachine<T> stateMachine;
         private T state;
+        private T lastState;
 
         public StateMachineUpdate(OrbitStateMachine<T> stateMachine, T state) {
             this.stateMachine = stateMachine;
@@ -43,7 +43,12 @@ public interface OrbitStateMachineSimpleStates extends OrbitStateMachineStates {
         }
 
         public void update() {
+            lastState = stateMachine.getState();
             stateMachine.setState(state);
+        }
+
+        public void undo() {
+            stateMachine.setState(lastState);
         }
     }
 }
