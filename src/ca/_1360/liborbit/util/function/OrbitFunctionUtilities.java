@@ -492,4 +492,74 @@ public final class OrbitFunctionUtilities {
     public static <T, U, E extends Throwable> OrbitExceptionalBiPredicate<T, U, E> anyEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E>... biPredicates) {
         return Arrays.stream(biPredicates).map(biPredicate -> (OrbitExceptionalBiPredicate<T, U, E>) biPredicate::test).reduce(OrbitExceptionalBiPredicate::or).orElse(OrbitExceptionalBiPredicate.never());
     }
+    
+    public static Runnable conditional(Runnable runnable, BooleanSupplier condition) {
+        return () -> {
+            if (condition.getAsBoolean())
+                runnable.run();
+        };
+    }
+
+    public static <T> Consumer<T> conditional(Consumer<? super T> consumer, BooleanSupplier condition) {
+        return t -> {
+            if (condition.getAsBoolean())
+                consumer.accept(t);
+        };
+    }
+
+    public static <T> Consumer<T> conditional(Consumer<? super T> consumer, Predicate<? super T> predicate) {
+        return t -> {
+            if (predicate.test(t))
+                consumer.accept(t);
+        };
+    }
+
+    public static <T, U> BiConsumer<T, U> conditional(BiConsumer<? super T, ? super U> biConsumer, BooleanSupplier condition) {
+        return (t, u) -> {
+            if (condition.getAsBoolean())
+                biConsumer.accept(t, u);
+        };
+    }
+
+    public static <T, U> BiConsumer<T, U> conditional(BiConsumer<? super T, ? super U> biConsumer, BiPredicate<? super T, ? super U> biPredicate) {
+        return (t, u) -> {
+            if (biPredicate.test(t, u))
+                biConsumer.accept(t, u);
+        };
+    }
+
+    public static <E extends Throwable> OrbitExceptionalRunnable<E> conditionalEx(OrbitExceptionalRunnable<? extends E> runnable, OrbitExceptionalSupplier<? extends Boolean, ? extends E> condition) {
+        return () -> {
+            if (condition.get())
+                runnable.run();
+        };
+    }
+
+    public static <T, E extends Throwable> OrbitExceptionalConsumer<T, E> conditionalEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, OrbitExceptionalSupplier<? extends Boolean, ? extends E> condition) {
+        return t -> {
+            if (condition.get())
+                consumer.accept(t);
+        };
+    }
+
+    public static <T, E extends Throwable> OrbitExceptionalConsumer<T, E> conditionalEx(OrbitExceptionalConsumer<? super T, ? extends E> consumer, OrbitExceptionalPredicate<? super T, ? extends E> predicate) {
+        return t -> {
+            if (predicate.test(t))
+                consumer.accept(t);
+        };
+    }
+
+    public static <T, U, E extends Throwable> OrbitExceptionalBiConsumer<T, U, E> conditionalEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, OrbitExceptionalSupplier<? extends Boolean, ? extends E> condition) {
+        return (t, u) -> {
+            if (condition.get())
+                biConsumer.accept(t, u);
+        };
+    }
+
+    public static <T, U, E extends Throwable> OrbitExceptionalBiConsumer<T, U, E> conditionalEx(OrbitExceptionalBiConsumer<? super T, ? super U, ? extends E> biConsumer, OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate) {
+        return (t, u) -> {
+            if (biPredicate.test(t, u))
+                biConsumer.accept(t, u);
+        };
+    }
 }
