@@ -42,7 +42,9 @@ public final class OrbitMiscUtilities {
             public T next() {
                 if (_next == null)
                     return supplier.get().orElseThrow(NoSuchElementException::new);
-                return _next;
+                T next = _next;
+                _next = null;
+                return next;
             }
         });
     }
