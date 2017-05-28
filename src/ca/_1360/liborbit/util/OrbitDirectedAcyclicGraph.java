@@ -77,13 +77,16 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
         LinkedList<T> list = new LinkedList<>();
         OrbitMiscUtilities.stream(() -> noEdges.isEmpty() ? Optional.empty() : Optional.of(noEdges.pop())).forEach(object -> {
             list.add(object);
-            incomingMap.entrySet().stream().filter(o -> o.getValue().contains(object)).forEach(o -> {
-                o.getValue().remove(object);
-                if (o.getValue().isEmpty()) {
-                    incomingMap.remove(o.getKey());
-                    noEdges.push(o.getKey());
+            ArrayList<T> toRemove = new ArrayList<>();
+            for (Map.Entry<T, ArrayList<T>> o : incomingMap.entrySet())
+                if (o.getValue().contains(object)) {
+                    o.getValue().remove(object);
+                    if (o.getValue().isEmpty()) {
+                        toRemove.add(o.getKey());
+                        noEdges.push(o.getKey());
+                    }
                 }
-            });
+            toRemove.forEach(incomingMap::remove);
         });
         if (incomingMap.isEmpty())
             objects = list;
