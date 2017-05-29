@@ -1,5 +1,8 @@
 package ca._1360.liborbit.io;
 
+import net.java.games.input.Controller;
+import net.java.games.input.ControllerEnvironment;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +11,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputProvider {
+    private final Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
     private final EmulatedMotor[] motors = new EmulatedMotor[10];
     private final boolean[] solenoids = new boolean[8];
     private final boolean[] dio = new boolean[10];
@@ -17,7 +21,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
 
     @Override
     public OrbitJoystickProvider getJoystick(int id) {
-        return new OrbitLocalJoystickProvider();
+        return new OrbitLocalJoystickProvider(controllers[id]);
     }
 
     @Override

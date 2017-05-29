@@ -1,14 +1,22 @@
 package ca._1360.liborbit.io;
 
+import net.java.games.input.Controller;
+
 public final class OrbitLocalJoystickProvider implements OrbitJoystickProvider {
+    private final Controller controller;
+
+    public OrbitLocalJoystickProvider(Controller controller) {
+        this.controller = controller;
+    }
+
     @Override
     public String getName() {
-        return null;
+        return controller.getName();
     }
 
     @Override
     public double getAxis(int i) {
-        return 0;
+        return 0.0;
     }
 
     @Override
