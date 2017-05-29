@@ -17,26 +17,27 @@ public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineSimp
         this.timeout = timeout;
     }
 
-    public T getSubsystem() {
+    public final T getSubsystem() {
         return subsystem;
     }
 
-    public long getTimeout() {
+    public final long getTimeout() {
         return timeout;
     }
 
-    public void join() throws InterruptedException {
-        synchronized (subsystem) {
-            if (running)
-                subsystem.wait();
-        }
+    public final void join() throws InterruptedException {
+        if (subsystem != null)
+            synchronized (subsystem) {
+                if (running)
+                    subsystem.wait();
+            }
     }
 
-    public void setGotoNextFunc(Runnable gotoNextFunc) {
+    public final void setGotoNextFunc(Runnable gotoNextFunc) {
         this.gotoNextFunc = gotoNextFunc;
     }
 
-    protected void gotoNext() {
+    protected final void gotoNext() {
         gotoNextFunc.run();
     }
 
@@ -47,18 +48,21 @@ public abstract class OrbitAutonomousCommand<T> implements OrbitStateMachineSimp
     }
 
     @Override
-    public void initialize() {
+    public final void initialize() {
         running = true;
         initializeCore();
     }
 
     @Override
-    public void deinitialize() {
+    public final void deinitialize() {
         deinitializeCore();
-        synchronized (subsystem) {
+        if (subsystem != null)
+            synchronized (subsystem) {
+                running = false;
+                subsystem.notifyAll();
+            }
+        else
             running = false;
-            subsystem.notifyAll();
-        }
     }
 
     @Override

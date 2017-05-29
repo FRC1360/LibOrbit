@@ -15,7 +15,7 @@ public class OrbitAutonomousStateMachineUpdateCommand<T, U extends OrbitStateMac
     }
 
     @Override
-    public void initialize() {
+    protected void initializeCore() {
         gotoNext();
     }
 
