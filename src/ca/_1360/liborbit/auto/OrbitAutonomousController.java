@@ -1,5 +1,7 @@
 package ca._1360.liborbit.auto;
 
+import ca._1360.liborbit.pipeline.OrbitPipelineInvalidConfigurationException;
+import ca._1360.liborbit.statemachine.OrbitSimpleStateMachine;
 import ca._1360.liborbit.statemachine.OrbitStateMachine;
 import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
@@ -12,9 +14,10 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class OrbitAutonomousController<T> {
-    private final OrbitAutonomousMode<T>[] modes;
+    private final List<OrbitAutonomousMode<T>> modes;
     private final T[] subsystems;
     private final ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(0);
     private final ArrayList<OrbitAutonomousMode<T>> selection = new ArrayList<>();
@@ -22,13 +25,13 @@ public final class OrbitAutonomousController<T> {
     private ArrayList<Runnable> startNext;
     private int done;
 
-    public OrbitAutonomousController(OrbitAutonomousMode<T>[] modes, T[] subsystems) {
+    public OrbitAutonomousController(List<OrbitAutonomousMode<T>> modes, T[] subsystems) {
         this.modes = modes;
         this.subsystems = subsystems;
     }
 
-    public OrbitAutonomousMode<T>[] getModes() {
-        return modes;
+    public List<OrbitAutonomousMode<T>> getModes() {
+        return new ArrayList<>(modes);
     }
 
     public ArrayList<OrbitAutonomousMode<T>> getSelection() {
@@ -36,15 +39,15 @@ public final class OrbitAutonomousController<T> {
     }
 
     public void start() {
-        done = -1;
-        startNext = new ArrayList<>();
-        Map<T, ArrayDeque<OrbitAutonomousCommand<T>>> map = Arrays.stream(subsystems).collect(Collectors.toMap(Function.identity(), t -> new ArrayDeque<>(Collections.singleton(new EndCommand()))));
-        selection.forEach(OrbitFunctionUtilities.specializeSecond((BiConsumer<OrbitAutonomousMode<T>, Consumer<OrbitAutonomousCommand<T>>>) OrbitAutonomousMode::add, c -> map.get(c.getSubsystem()).add(c)));
-        controllers = new HashMap<>(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, ((Function<Map.Entry<T, ArrayDeque<OrbitAutonomousCommand<T>>>, ArrayDeque<OrbitAutonomousCommand<T>>>) Map.Entry::getValue).andThen(SubsystemController::new))));
-        ArrayList<Runnable> oldNext = startNext;
-        startNext = new ArrayList<>();
         done = 0;
-        oldNext.forEach(Runnable::run);
+        startNext = new ArrayList<>();
+        Map<T, ArrayDeque<OrbitAutonomousCommand<T>>> map = Arrays.stream(subsystems).collect(Collectors.toMap(Function.identity(), t -> new ArrayDeque<>(Collections.singleton(new FinishedCommand()))));
+        for (OrbitAutonomousMode<T> mode : selection) {
+            mode.add(c -> map.get(c.getSubsystem()).add(c));
+            map.values().forEach(OrbitFunctionUtilities.specializeSecondSupplier((BiConsumer<? super ArrayDeque<OrbitAutonomousCommand<T>>, ? super EndCommand>) Deque::add, EndCommand::new));
+        }
+        controllers = new HashMap<>(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, ((Function<Map.Entry<T, ArrayDeque<OrbitAutonomousCommand<T>>>, ArrayDeque<OrbitAutonomousCommand<T>>>) Map.Entry::getValue).andThen(OrbitFunctionUtilities.wrapException(SubsystemController::new, RuntimeException::new)))));
+        controllers.values().stream().map(OrbitStateMachine::getState).forEach(OrbitAutonomousCommand::gotoNext);
     }
 
     public void stop() {
@@ -90,12 +93,12 @@ public final class OrbitAutonomousController<T> {
         protected void deinitializeCore() { }
     }
 
-    private final class SubsystemController extends OrbitStateMachine<OrbitAutonomousCommand<T>> {
+    private final class SubsystemController extends OrbitSimpleStateMachine<OrbitAutonomousCommand<T>> {
         private ArrayDeque<OrbitAutonomousCommand<T>> queue;
         private ScheduledFuture<?> future;
 
-        private SubsystemController(ArrayDeque<OrbitAutonomousCommand<T>> queue) {
-            super(new FinishedCommand());
+        private SubsystemController(ArrayDeque<OrbitAutonomousCommand<T>> queue) throws OrbitPipelineInvalidConfigurationException {
+            super(Stream.concat(Stream.of(new FinishedCommand()), queue.stream()).collect(Collectors.toList()));
             queue.forEach(OrbitFunctionUtilities.source((BiConsumer<OrbitAutonomousCommand<T>, Runnable>) OrbitAutonomousCommand::setGotoNextFunc, Function.identity(), OrbitFunctionUtilities.specializeFirst((BiFunction<Consumer<OrbitAutonomousCommand<T>>, OrbitAutonomousCommand<T>, Runnable>) OrbitFunctionUtilities::specialize, this::next)));
             queue.add(new FinishedCommand());
             this.queue = queue;
