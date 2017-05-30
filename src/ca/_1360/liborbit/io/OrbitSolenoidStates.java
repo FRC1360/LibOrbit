@@ -12,7 +12,7 @@ public enum OrbitSolenoidStates implements OrbitStateMachineStates {
         this.value = value;
     }
 
-    public boolean isValue() {
+    public boolean getValue() {
         return value;
     }
 
