@@ -116,6 +116,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         private final int pdpPort;
         private final DoubleSupplier inertia;
         private final DoubleSupplier friction;
+        private double currentInertia;
         private double powerLevel = 0.0;
         private double angularVelocity = 0.0;
         private double torque = 0.0;
@@ -124,6 +125,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             this.pdpPort = pdpPort;
             this.inertia = inertia;
             this.friction = friction;
+            currentInertia = inertia.getAsDouble();
         }
 
         public int getPdpPort() {
@@ -148,6 +150,11 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         }
 
         public void update() {
+            double newInertia = inertia.getAsDouble();
+            if (newInertia != currentInertia) {
+                angularVelocity *= currentInertia / newInertia;
+                currentInertia = newInertia;
+            }
             torque = (BASE_VOLTAGE * powerLevel - angularVelocity * MOTOR_CONSTANT) * MOTOR_CONSTANT / RESISTANCE;
             double accel = (torque - Math.copySign(friction.getAsDouble(), angularVelocity)) / inertia.getAsDouble();
             double newVel = angularVelocity + accel * 0.0001;
