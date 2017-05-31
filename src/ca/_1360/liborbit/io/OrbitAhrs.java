@@ -1,123 +1,124 @@
 package ca._1360.liborbit.io;
 
-import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
+import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
 
 public final class OrbitAhrs {
-    private final OrbitPipelineInputEndpoint continuousAngleEndpoint = null;
-    private final OrbitPipelineInputEndpoint yawEndpoint = null;
-    private final OrbitPipelineInputEndpoint pitchEndpoint = null;
-    private final OrbitPipelineInputEndpoint rollEndpoint = null;
-    private final OrbitPipelineInputEndpoint accelXEndpoint = null;
-    private final OrbitPipelineInputEndpoint accelYEndpoint = null;
-    private final OrbitPipelineInputEndpoint accelZEndpoint = null;
-    private final OrbitPipelineInputEndpoint velXEndpoint = null;
-    private final OrbitPipelineInputEndpoint velYEndpoint = null;
-    private final OrbitPipelineInputEndpoint velZEndpoint = null;
-    private final OrbitPipelineInputEndpoint posXEndpoint = null;
-    private final OrbitPipelineInputEndpoint posYEndpoint = null;
-    private final OrbitPipelineInputEndpoint posZEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawAccelXEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawAccelYEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawAccelZEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawGyroXEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawGyroYEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawGyroZEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawMagXEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawMagYEndpoint = null;
-    private final OrbitPipelineInputEndpoint rawMagZEndpoint = null;
-    private final OrbitPipelineInputEndpoint barometricPressureEndpoint = null;
+    private final OrbitAhrsProvider provider = OrbitInputOutputManager.getProvider().getAhrs();
+    private final OrbitPipelineOutputEndpoint continuousAngleEndpoint = provider::getContinuousAngle;
+    private final OrbitPipelineOutputEndpoint yawEndpoint = provider::getYaw;
+    private final OrbitPipelineOutputEndpoint pitchEndpoint = provider::getPitch;
+    private final OrbitPipelineOutputEndpoint rollEndpoint = provider::getRoll;
+    private final OrbitPipelineOutputEndpoint accelXEndpoint = provider::getAccelX;
+    private final OrbitPipelineOutputEndpoint accelYEndpoint = provider::getAccelY;
+    private final OrbitPipelineOutputEndpoint accelZEndpoint = provider::getAccelZ;
+    private final OrbitPipelineOutputEndpoint velXEndpoint = provider::getVelX;
+    private final OrbitPipelineOutputEndpoint velYEndpoint = provider::getVelY;
+    private final OrbitPipelineOutputEndpoint velZEndpoint = provider::getVelZ;
+    private final OrbitPipelineOutputEndpoint posXEndpoint = provider::getPosX;
+    private final OrbitPipelineOutputEndpoint posYEndpoint = provider::getPosY;
+    private final OrbitPipelineOutputEndpoint posZEndpoint = provider::getPosZ;
+    private final OrbitPipelineOutputEndpoint rawAccelXEndpoint = provider::getRawAccelX;
+    private final OrbitPipelineOutputEndpoint rawAccelYEndpoint = provider::getRawAccelY;
+    private final OrbitPipelineOutputEndpoint rawAccelZEndpoint = provider::getRawAccelZ;
+    private final OrbitPipelineOutputEndpoint rawGyroXEndpoint = provider::getRawGyroX;
+    private final OrbitPipelineOutputEndpoint rawGyroYEndpoint = provider::getRawGyroY;
+    private final OrbitPipelineOutputEndpoint rawGyroZEndpoint = provider::getRawGyroZ;
+    private final OrbitPipelineOutputEndpoint rawMagXEndpoint = provider::getRawMagX;
+    private final OrbitPipelineOutputEndpoint rawMagYEndpoint = provider::getRawMagY;
+    private final OrbitPipelineOutputEndpoint rawMagZEndpoint = provider::getRawMagZ;
+    private final OrbitPipelineOutputEndpoint barometricPressureEndpoint = provider::getBarometricPressure;
     
     public OrbitAhrs() { }
 
-    public OrbitPipelineInputEndpoint getContinuousAngleEndpoint() {
+    public OrbitPipelineOutputEndpoint getContinuousAngle() {
         return continuousAngleEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getYaw() {
+    public OrbitPipelineOutputEndpoint getYaw() {
         return yawEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getPitch() {
+    public OrbitPipelineOutputEndpoint getPitch() {
         return pitchEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRoll() {
+    public OrbitPipelineOutputEndpoint getRoll() {
         return rollEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getAccelX() {
+    public OrbitPipelineOutputEndpoint getAccelX() {
         return accelXEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getAccelY() {
+    public OrbitPipelineOutputEndpoint getAccelY() {
         return accelYEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getAccelZ() {
+    public OrbitPipelineOutputEndpoint getAccelZ() {
         return accelZEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getVelX() {
+    public OrbitPipelineOutputEndpoint getVelX() {
         return velXEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getVelY() {
+    public OrbitPipelineOutputEndpoint getVelY() {
         return velYEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getVelZ() {
+    public OrbitPipelineOutputEndpoint getVelZ() {
         return velZEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getPosX() {
+    public OrbitPipelineOutputEndpoint getPosX() {
         return posXEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getPosY() {
+    public OrbitPipelineOutputEndpoint getPosY() {
         return posYEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getPosZ() {
+    public OrbitPipelineOutputEndpoint getPosZ() {
         return posZEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawAccelX() {
+    public OrbitPipelineOutputEndpoint getRawAccelX() {
         return rawAccelXEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawAccelY() {
+    public OrbitPipelineOutputEndpoint getRawAccelY() {
         return rawAccelYEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawAccelZ() {
+    public OrbitPipelineOutputEndpoint getRawAccelZ() {
         return rawAccelZEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawGyroX() {
+    public OrbitPipelineOutputEndpoint getRawGyroX() {
         return rawGyroXEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawGyroY() {
+    public OrbitPipelineOutputEndpoint getRawGyroY() {
         return rawGyroYEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawGyroZ() {
+    public OrbitPipelineOutputEndpoint getRawGyroZ() {
         return rawGyroZEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawMagX() {
+    public OrbitPipelineOutputEndpoint getRawMagX() {
         return rawMagXEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawMagY() {
+    public OrbitPipelineOutputEndpoint getRawMagY() {
         return rawMagYEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getRawMagZ() {
+    public OrbitPipelineOutputEndpoint getRawMagZ() {
         return rawMagZEndpoint;
     }
 
-    public OrbitPipelineInputEndpoint getBarometricPressure() {
+    public OrbitPipelineOutputEndpoint getBarometricPressure() {
         return barometricPressureEndpoint;
     }
 }

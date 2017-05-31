@@ -14,8 +14,13 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
     private final boolean[] solenoids = new boolean[8];
     private final boolean[] dio = new boolean[10];
     private final ArrayList<EmulatedEncoder> encoders = new ArrayList<>();
+    private final OrbitAhrsProvider ahrsProvider;
     private ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
     private Future<?> future;
+
+    public OrbitEmulatedInputOutputProvider(OrbitAhrsProvider ahrsProvider) {
+        this.ahrsProvider = ahrsProvider;
+    }
 
     @Override
     public OrbitJoystickProvider getJoystick(int id) {
@@ -53,6 +58,11 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             if (encoder.getPortA() == portA && encoder.getPortB() == portB)
                 return encoder;
         return null;
+    }
+
+    @Override
+    public OrbitAhrsProvider getAhrs() {
+        return ahrsProvider;
     }
 
     public EmulatedMotor getMotor(int port) {
