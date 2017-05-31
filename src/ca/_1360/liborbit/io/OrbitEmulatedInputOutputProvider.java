@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.function.DoubleSupplier;
 
 public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputProvider {
     private final EmulatedMotor[] motors = new EmulatedMotor[10];
@@ -74,12 +75,20 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         return new ArrayList<>(encoders);
     }
 
-    public void mapMotor(int pwmPort, int pdpPort, double inertia, double friction) {
+    public void mapMotor(int pwmPort, int pdpPort, DoubleSupplier inertia, DoubleSupplier friction) {
         motors[pwmPort] = new EmulatedMotor(pdpPort, inertia, friction);
     }
 
-    public void mapEncoder(int portA, int portB, int pwmPort, double ratio) {
+    public void mapMotor(int pwmPort, int pdpPort, double inertia, double friction) {
+        motors[pwmPort] = new EmulatedMotor(pdpPort, () -> inertia, () -> friction);
+    }
+
+    public void mapEncoder(int portA, int portB, int pwmPort, DoubleSupplier ratio) {
         encoders.add(new EmulatedEncoder(portA, portB, motors[pwmPort], ratio));
+    }
+
+    public void mapEncoder(int portA, int portB, int pwmPort, double ratio) {
+        encoders.add(new EmulatedEncoder(portA, portB, motors[pwmPort], () -> ratio));
     }
 
     public synchronized void start() {
@@ -105,13 +114,13 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         private static final double BASE_VOLTAGE = 12.0;
 
         private final int pdpPort;
-        private final double inertia;
-        private final double friction;
+        private final DoubleSupplier inertia;
+        private final DoubleSupplier friction;
         private double powerLevel = 0.0;
         private double angularVelocity = 0.0;
         private double torque = 0.0;
 
-        public EmulatedMotor(int pdpPort, double inertia, double friction) {
+        public EmulatedMotor(int pdpPort, DoubleSupplier inertia, DoubleSupplier friction) {
             this.pdpPort = pdpPort;
             this.inertia = inertia;
             this.friction = friction;
@@ -140,7 +149,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
 
         public void update() {
             torque = (BASE_VOLTAGE * powerLevel - angularVelocity * MOTOR_CONSTANT) * MOTOR_CONSTANT / RESISTANCE;
-            double accel = (torque - Math.copySign(friction, angularVelocity)) / inertia;
+            double accel = (torque - Math.copySign(friction.getAsDouble(), angularVelocity)) / inertia.getAsDouble();
             double newVel = angularVelocity + accel * 0.0001;
             if (powerLevel != 0.0 || Math.signum(newVel) == Math.signum(angularVelocity))
                 angularVelocity = newVel;
@@ -153,10 +162,10 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         private final int portA;
         private final int portB;
         private final EmulatedMotor motor;
-        private final double ratio;
+        private final DoubleSupplier ratio;
         private double position = 0.0;
 
-        public EmulatedEncoder(int portA, int portB, EmulatedMotor motor, double ratio) {
+        public EmulatedEncoder(int portA, int portB, EmulatedMotor motor, DoubleSupplier ratio) {
             this.portA = portA;
             this.portB = portB;
             this.motor = motor;
@@ -173,12 +182,12 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
 
         @Override
         public int getPosition() {
-            return (int) (position * ratio);
+            return (int) (position * ratio.getAsDouble());
         }
 
         @Override
         public double getRate() {
-            return motor.getAngularVelocity() * ratio;
+            return motor.getAngularVelocity() * ratio.getAsDouble();
         }
 
         @Override
