@@ -41,7 +41,7 @@ public final class OrbitSlewFilter extends OrbitSimplePipelineFilter {
     @Override
     protected double calculateCore(double input) {
         long time = System.currentTimeMillis();
-        last = Math.max(Math.min(Math.copySign(input - last, Math.min(Math.abs(input - last), maxRate * (time - lastUpdateTime))), maxValue), minValue);
+        last = Math.max(Math.min(last + Math.copySign(Math.min(Math.abs(input - last), maxRate * (time - lastUpdateTime)), input - last), maxValue), minValue);
         lastUpdateTime = time;
         return last;
     }
