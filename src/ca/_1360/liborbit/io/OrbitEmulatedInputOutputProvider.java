@@ -3,6 +3,7 @@ package ca._1360.liborbit.io;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -83,26 +84,32 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
 
     public synchronized void start() {
         if (future == null)
-            future = scheduler.scheduleAtFixedRate(this::update, 0, 10, TimeUnit.MILLISECONDS);
+            future = scheduler.scheduleAtFixedRate(this::update, 0, 100, TimeUnit.NANOSECONDS);
     }
 
     public synchronized void stop() {
-        if (future != null)
+        if (future != null) {
             future.cancel(true);
+            future = null;
+        }
     }
 
     public synchronized void update() {
-        Arrays.stream(motors).forEach(EmulatedMotor::update);
+        Arrays.stream(motors).filter(Objects::nonNull).forEach(EmulatedMotor::update);
         encoders.forEach(EmulatedEncoder::update);
     }
 
     public static final class EmulatedMotor {
+        private static final double MOTOR_CONSTANT = 0.05;
+        private static final double RESISTANCE = 0.5;
+        private static final double BASE_VOLTAGE = 12.0;
+
         private final int pdpPort;
         private final double inertia;
         private final double friction;
-        private double powerLevel;
-        private double angularVelocity;
-        private double torque;
+        private double powerLevel = 0.0;
+        private double angularVelocity = 0.0;
+        private double torque = 0.0;
 
         public EmulatedMotor(int pdpPort, double inertia, double friction) {
             this.pdpPort = pdpPort;
@@ -126,18 +133,19 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             this.powerLevel = powerLevel;
         }
 
-        public void setAngularVelocity(double angularVelocity) {
-            this.angularVelocity = angularVelocity;
-        }
-
         public double calculateCurrent() {
-            return 0.1 * angularVelocity * torque / powerLevel;
+            double current = torque / MOTOR_CONSTANT;
+            return Math.signum(current) == Math.signum(powerLevel) ? Math.abs(current) : 0.0;
         }
 
         public void update() {
-            torque = 531.0 * powerLevel / angularVelocity;
-            double accel = (torque - Math.copySign(angularVelocity, friction)) / inertia;
-            angularVelocity += accel * 0.01;
+            torque = (BASE_VOLTAGE * powerLevel - angularVelocity * MOTOR_CONSTANT) * MOTOR_CONSTANT / RESISTANCE;
+            double accel = (torque - Math.copySign(friction, angularVelocity)) / inertia;
+            double newVel = angularVelocity + accel * 0.0001;
+            if (powerLevel != 0.0 || Math.signum(newVel) == Math.signum(angularVelocity))
+                angularVelocity = newVel;
+            else
+                angularVelocity = 0.0;
         }
     }
 
@@ -146,7 +154,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         private final int portB;
         private final EmulatedMotor motor;
         private final double ratio;
-        private double position;
+        private double position = 0.0;
 
         public EmulatedEncoder(int portA, int portB, EmulatedMotor motor, double ratio) {
             this.portA = portA;
