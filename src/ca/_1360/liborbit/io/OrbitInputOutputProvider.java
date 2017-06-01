@@ -8,4 +8,5 @@ public interface OrbitInputOutputProvider {
     double getCurrent(int port);
     boolean getDigitalIn(int port);
     OrbitEncoderProvider getEncoder(int portA, int portB);
+    OrbitAhrsProvider getAhrs();
 }

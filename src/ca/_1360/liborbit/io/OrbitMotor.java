@@ -2,16 +2,16 @@ package ca._1360.liborbit.io;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
 import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
+import ca._1360.liborbit.pipeline.OrbitPipelineSimpleSource;
+import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
 public final class OrbitMotor {
-    private final int pdpPort;
     private final OrbitPipelineInputEndpoint powerEndpoint;
     private final OrbitPipelineOutputEndpoint currentEndpoint;
 
-    public OrbitMotor(int victorPort, int pdpPort) {
-        this.pdpPort = pdpPort;
-        powerEndpoint = null;
-        currentEndpoint = null;
+    public OrbitMotor(int pwmPort, int pdpPort) {
+        powerEndpoint = OrbitFunctionUtilities.specializeFirst(OrbitInputOutputManager.getProvider()::setMotorPower, pwmPort)::accept;
+        currentEndpoint = (OrbitPipelineSimpleSource) OrbitFunctionUtilities.specialize(OrbitInputOutputManager.getProvider()::getCurrent, pdpPort)::get;
     }
 
     public OrbitPipelineInputEndpoint getPowerEndpoint() {

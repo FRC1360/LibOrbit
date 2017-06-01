@@ -32,4 +32,9 @@ public final class OrbitRealInputOutputProvider implements OrbitInputOutputProvi
     public OrbitEncoderProvider getEncoder(int portA, int portB) {
         return null;
     }
+
+    @Override
+    public OrbitAhrsProvider getAhrs() {
+        return null;
+    }
 }
