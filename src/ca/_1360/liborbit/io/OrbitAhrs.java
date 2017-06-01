@@ -14,9 +14,6 @@ public final class OrbitAhrs {
     private final OrbitPipelineOutputEndpoint velXEndpoint = provider::getVelX;
     private final OrbitPipelineOutputEndpoint velYEndpoint = provider::getVelY;
     private final OrbitPipelineOutputEndpoint velZEndpoint = provider::getVelZ;
-    private final OrbitPipelineOutputEndpoint posXEndpoint = provider::getPosX;
-    private final OrbitPipelineOutputEndpoint posYEndpoint = provider::getPosY;
-    private final OrbitPipelineOutputEndpoint posZEndpoint = provider::getPosZ;
     private final OrbitPipelineOutputEndpoint rawAccelXEndpoint = provider::getRawAccelX;
     private final OrbitPipelineOutputEndpoint rawAccelYEndpoint = provider::getRawAccelY;
     private final OrbitPipelineOutputEndpoint rawAccelZEndpoint = provider::getRawAccelZ;
@@ -68,18 +65,6 @@ public final class OrbitAhrs {
 
     public OrbitPipelineOutputEndpoint getVelZ() {
         return velZEndpoint;
-    }
-
-    public OrbitPipelineOutputEndpoint getPosX() {
-        return posXEndpoint;
-    }
-
-    public OrbitPipelineOutputEndpoint getPosY() {
-        return posYEndpoint;
-    }
-
-    public OrbitPipelineOutputEndpoint getPosZ() {
-        return posZEndpoint;
     }
 
     public OrbitPipelineOutputEndpoint getRawAccelX() {
