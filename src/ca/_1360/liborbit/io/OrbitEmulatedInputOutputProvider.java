@@ -18,8 +18,13 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
     private final boolean[] solenoids = new boolean[8];
     private final boolean[] dio = new boolean[10];
     private final ArrayList<EmulatedEncoder> encoders = new ArrayList<>();
+    private final OrbitAhrsProvider ahrsProvider;
     private ScheduledThreadPoolExecutor scheduler = new ScheduledThreadPoolExecutor(1);
     private Future<?> future;
+
+    public OrbitEmulatedInputOutputProvider(OrbitAhrsProvider ahrsProvider) {
+        this.ahrsProvider = ahrsProvider;
+    }
 
     @Override
     public OrbitJoystickProvider getJoystick(int id) {
@@ -57,6 +62,11 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             if (encoder.getPortA() == portA && encoder.getPortB() == portB)
                 return encoder;
         return null;
+    }
+
+    @Override
+    public OrbitAhrsProvider getAhrs() {
+        return ahrsProvider;
     }
 
     public EmulatedMotor getMotor(int port) {
@@ -120,6 +130,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         private final int pdpPort;
         private final DoubleSupplier inertia;
         private final DoubleSupplier friction;
+        private double currentInertia;
         private double powerLevel = 0.0;
         private double angularVelocity = 0.0;
         private double torque = 0.0;
@@ -128,6 +139,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             this.pdpPort = pdpPort;
             this.inertia = inertia;
             this.friction = friction;
+            currentInertia = inertia.getAsDouble();
         }
 
         public int getPdpPort() {
@@ -152,6 +164,11 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
         }
 
         public void update() {
+            double newInertia = inertia.getAsDouble();
+            if (newInertia != currentInertia) {
+                angularVelocity *= currentInertia / newInertia;
+                currentInertia = newInertia;
+            }
             torque = (BASE_VOLTAGE * powerLevel - angularVelocity * MOTOR_CONSTANT) * MOTOR_CONSTANT / RESISTANCE;
             double accel = (torque - Math.copySign(friction.getAsDouble(), angularVelocity)) / inertia.getAsDouble();
             double newVel = angularVelocity + accel * 0.0001;
