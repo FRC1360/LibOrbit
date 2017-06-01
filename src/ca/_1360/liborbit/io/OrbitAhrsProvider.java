@@ -13,9 +13,6 @@ public interface OrbitAhrsProvider {
     OptionalDouble getVelX();
     OptionalDouble getVelY();
     OptionalDouble getVelZ();
-    OptionalDouble getPosX();
-    OptionalDouble getPosY();
-    OptionalDouble getPosZ();
     OptionalDouble getRawAccelX();
     OptionalDouble getRawAccelY();
     OptionalDouble getRawAccelZ();
