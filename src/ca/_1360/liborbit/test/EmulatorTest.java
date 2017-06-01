@@ -16,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 public class EmulatorTest {
     public static void main(String[] args) throws OrbitPipelineInvalidConfigurationException, InterruptedException {
-        OrbitEmulatedInputOutputProvider provider = new OrbitEmulatedInputOutputProvider();
+        OrbitEmulatedInputOutputProvider provider = new OrbitEmulatedInputOutputProvider(null);
         OrbitContainer<Double> inertia = new OrbitContainer<>(0.00884421747);
         OrbitContainer<Double> friction = new OrbitContainer<>(0.6);
         provider.mapMotor(0, 0, inertia::getValue, friction::getValue);
