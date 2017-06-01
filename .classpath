@@ -7,11 +7,5 @@
 	<classpathentry kind="lib" path="C:/Users/nmeritn/wpilib/java/current/lib/opencv.jar"/>
 	<classpathentry kind="lib" path="C:/Users/nmeritn/wpilib/java/current/lib/WPILib.jar"/>
 	<classpathentry kind="lib" path="C:/Users/nmeritn/wpilib/user/java/lib/navx_frc.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jinput-2.0.7-javadoc.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jinput-2.0.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jinput-platform-2.0.7-natives-linux.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jinput-platform-2.0.7-natives-osx.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jinput-platform-2.0.7-natives-windows.jar"/>
-	<classpathentry exported="true" kind="lib" path="lib/jutils-1.0.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
