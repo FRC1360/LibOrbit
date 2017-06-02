@@ -2,22 +2,23 @@
 #include "joystick.h"
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 static jclass javaClass;
 static jfieldID idField;
-static std::vector<joystick> joysticks;
+static std::vector<int> map({ 0, 1, 2, 3 });
+static joystick joysticks[4] = { {0}, {1}, {2}, {3} };
 
 static jint getId(JNIEnv *env, jobject object)
 {
-  return env->GetIntField(object, idField);
+  return map[env->GetIntField(object, idField)];
 }
 
 extern "C" {
 
   JNIEXPORT jstring JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_getName(JNIEnv *env, jobject self)
   {
-    Platform::String ^name = joysticks[getId(env, self)].getName();
-    return env->NewString((jchar *)name->Data(), name->Length());
+    return env->NewStringUTF(joysticks[getId(env, self)].getName());
   }
 
   JNIEXPORT jdouble JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_getAxis(JNIEnv *env, jobject self, jint i)
@@ -42,15 +43,15 @@ extern "C" {
 
   JNIEXPORT jint JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_refresh(JNIEnv *env, jclass joystickClass)
   {
-    return joysticks.size();
+    return 4;
   }
 
   JNIEXPORT void JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_reorder(JNIEnv *env, jclass joystickClass, jint from, jint to)
   {
     if (from > to)
-      std::rotate(joysticks.rbegin() + (joysticks.size() - from - 1), joysticks.rbegin() + (joysticks.size() - from - 1), joysticks.rbegin() + (joysticks.size() - to - 1));
+      std::rotate(map.rbegin() + (map.size() - from - 1), map.rbegin() + (map.size() - from - 1), map.rbegin() + (map.size() - to - 1));
     else
-      std::rotate(joysticks.begin() + from, joysticks.begin() + from, joysticks.begin() + to);
+      std::rotate(map.begin() + from, map.begin() + from, map.begin() + to);
   }
 
   JNIEXPORT void JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_setup(JNIEnv *env, jobject self)
@@ -59,11 +60,7 @@ extern "C" {
 
   JNIEXPORT void JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_initialize(JNIEnv *env, jclass joystickClass)
   {
-    Windows::Foundation::Initialize();
     javaClass = joystickClass;
     idField = env->GetFieldID(joystickClass, "id", "I");
-    auto gamepads = Gamepad::Gamepads;
-    for (int i = 0; i < gamepads->Size; ++i)
-      joysticks.push_back({ (size_t)i, gamepads->GetAt(i) });
   }
 }

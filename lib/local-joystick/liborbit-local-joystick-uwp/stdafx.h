@@ -7,8 +7,7 @@
 
 #include "targetver.h"
 
-#include <Windows.Foundation.h>
-#include <wrl\wrappers\corewrappers.h>
-#include <wrl\client.h>
+#include <windows.h>
+#include <Xinput.h>
 
 #include "ca__1360_liborbit_io_OrbitLocalJoystickProvider.h"

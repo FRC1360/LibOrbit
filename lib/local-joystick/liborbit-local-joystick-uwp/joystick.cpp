@@ -1,64 +1,76 @@
 #include "stdafx.h"
 #include "joystick.h"
 
-static unsigned buttonTransform[] = { 0, (unsigned)GamepadButtons::A, (unsigned)GamepadButtons::B, (unsigned)GamepadButtons::X, (unsigned)GamepadButtons::Y,(unsigned)GamepadButtons::LeftShoulder, (unsigned)GamepadButtons::RightShoulder, (unsigned)GamepadButtons::View, (unsigned)GamepadButtons::Menu, (unsigned)GamepadButtons::LeftThumbstick, (unsigned)GamepadButtons::RightThumbstick };
+static WORD buttonTransform[] = { 0, XINPUT_GAMEPAD_A, XINPUT_GAMEPAD_B, XINPUT_GAMEPAD_X, XINPUT_GAMEPAD_Y,XINPUT_GAMEPAD_LEFT_SHOULDER, XINPUT_GAMEPAD_RIGHT_SHOULDER, XINPUT_GAMEPAD_BACK, XINPUT_GAMEPAD_START, XINPUT_GAMEPAD_LEFT_THUMB, XINPUT_GAMEPAD_RIGHT_THUMB };
 
-joystick::joystick(size_t index, Gamepad ^controller) : index(index), controller(controller)
+static bool read(XINPUT_STATE &state, size_t index)
 {
+  ZeroMemory(&state, sizeof(XINPUT_STATE));
+  return XInputGetState(index, &state) == ERROR_SUCCESS;
+}
+
+joystick::joystick(size_t index) : index(index)
+{
+  ZeroMemory(&vibration, sizeof(XINPUT_VIBRATION));
 }
 
 joystick::~joystick()
 {
 }
 
-Platform::String ^joystick::getName()
+const char *joystick::getName()
 {
-  return controller->ToString();
+  XINPUT_STATE state;
+  return read(state, index) ? "Xbox 360 Controller" : "Disconnected";
 }
 
 double joystick::getAxis(int i)
 {
-  auto reading = controller->GetCurrentReading();
+  XINPUT_STATE state;
+  read(state, index);
   switch (i) {
   case 0:
-    return reading.LeftThumbstickX;
+    return max(state.Gamepad.sThumbLX / 32767, -1.0);
   case 1:
-    return reading.LeftThumbstickY;
+    return max(state.Gamepad.sThumbLY / 32767, -1.0);
   case 2:
-    return reading.LeftTrigger;
+    return state.Gamepad.bLeftTrigger / 255;
   case 3:
-    return reading.RightTrigger;
+    return state.Gamepad.bRightTrigger / 255;
   case 4:
-    return reading.RightThumbstickX;
+    return max(state.Gamepad.sThumbRX / 32767, -1.0);
   case 5:
-    return reading.LeftThumbstickY;
+    return max(state.Gamepad.sThumbRY / 32767, -1.0);
   }
   return 0.0;
 }
 
 bool joystick::getButton(int i)
 {
-  return ((unsigned)controller->GetCurrentReading().Buttons & buttonTransform[i]) == buttonTransform[i];
+  XINPUT_STATE state;
+  read(state, index);
+  return state.Gamepad.wButtons & buttonTransform[i];
 }
 
 int joystick::getPov(int i)
 {
   if (i != 0)
     return -1;
-  GamepadButtons buttons = controller->GetCurrentReading().Buttons;
+  XINPUT_STATE state;
+  read(state, index);
   int count = 0;
   int total = 0;
-  if ((buttons & GamepadButtons::DPadUp) == GamepadButtons::DPadUp)
+  if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_UP)
     ++count;
-  if ((buttons & GamepadButtons::DPadRight) == GamepadButtons::DPadRight) {
+  if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_RIGHT) {
     total += 90;
     ++count;
   }
-  if ((buttons & GamepadButtons::DPadDown) == GamepadButtons::DPadDown) {
+  if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_DOWN) {
     total += 180;
     ++count;
   }
-  if ((buttons & GamepadButtons::DPadLeft) == GamepadButtons::DPadRight) {
+  if (state.Gamepad.wButtons & XINPUT_GAMEPAD_DPAD_LEFT) {
     total += 270;
     ++count;
   }
@@ -67,20 +79,13 @@ int joystick::getPov(int i)
 
 void joystick::setOutput(int i, bool v)
 {
-  GamepadVibration vibration = controller->Vibration;
   switch (i) {
   case 0:
-    vibration.LeftMotor = v;
+    vibration.wLeftMotorSpeed = v ? 65535 : 0;
     break;
   case 1:
-    vibration.RightMotor = v;
-    break;
-  case 2:
-    vibration.LeftTrigger = v;
-    break;
-  case 3:
-    vibration.RightTrigger = v;
+    vibration.wRightMotorSpeed = v ? 65535 : 0;
     break;
   }
-  controller->Vibration = vibration;
+  XInputSetState(index, &vibration);
 }
