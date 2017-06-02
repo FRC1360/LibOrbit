@@ -1,16 +1,14 @@
 #pragma once
 
-using namespace Windows::Gaming::Input;
-
 class joystick
 {
 private:
   size_t index;
-  Gamepad ^controller;
+  XINPUT_VIBRATION vibration;
 public:
-  joystick(size_t, Gamepad ^);
+  joystick(size_t);
   ~joystick();
-  Platform::String ^getName();
+  const char *getName();
   double getAxis(int i);
   bool getButton(int i);
   int getPov(int i);
