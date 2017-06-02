@@ -35,17 +35,17 @@ double joystick::getAxis(int i)
   read(state, index);
   switch (i) {
   case 0:
-    return max(state.Gamepad.sThumbLX / 32767, -1.0);
+    return max(state.Gamepad.sThumbLX / 32767.0, -1.0);
   case 1:
-    return max(state.Gamepad.sThumbLY / 32767, -1.0);
+    return max(state.Gamepad.sThumbLY / 32767.0, -1.0);
   case 2:
-    return state.Gamepad.bLeftTrigger / 255;
+    return state.Gamepad.bLeftTrigger / 255.0;
   case 3:
-    return state.Gamepad.bRightTrigger / 255;
+    return state.Gamepad.bRightTrigger / 255.0;
   case 4:
-    return max(state.Gamepad.sThumbRX / 32767, -1.0);
+    return max(state.Gamepad.sThumbRX / 32767.0, -1.0);
   case 5:
-    return max(state.Gamepad.sThumbRY / 32767, -1.0);
+    return max(state.Gamepad.sThumbRY / 32767.0, -1.0);
   }
   return 0.0;
 }
