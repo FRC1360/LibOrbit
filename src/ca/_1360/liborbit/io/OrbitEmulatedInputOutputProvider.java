@@ -24,7 +24,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
 
     @Override
     public OrbitJoystickProvider getJoystick(int id) {
-        return new OrbitLocalJoystickProvider();
+        return new OrbitLocalJoystickProvider(id);
     }
 
     @Override
