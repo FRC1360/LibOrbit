@@ -41,9 +41,14 @@ extern "C" {
     joysticks[getId(env, self)].setOutput(i, value);
   }
 
-  JNIEXPORT jint JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_refresh(JNIEnv *env, jclass joystickClass)
+  JNIEXPORT jbooleanArray JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_refresh(JNIEnv *env, jclass joystickClass)
   {
-    return 4;
+    jbooleanArray array = env->NewBooleanArray(4);
+    jboolean connected[4];
+    for (int i = 0; i < 4; ++i)
+      connected[i] = joysticks[map[i]].isConnected();
+    env->SetBooleanArrayRegion(array, 0, 4, connected);
+    return array;
   }
 
   JNIEXPORT void JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_reorder(JNIEnv *env, jclass joystickClass, jint from, jint to)

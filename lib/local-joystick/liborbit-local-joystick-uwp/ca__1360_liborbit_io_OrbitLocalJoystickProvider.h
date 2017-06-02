@@ -50,9 +50,9 @@ extern "C" {
   /*
   * Class:     ca__1360_liborbit_io_OrbitLocalJoystickProvider
   * Method:    refresh
-  * Signature: ()I
+  * Signature: ()[Z
   */
-  JNIEXPORT jint JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_refresh
+  JNIEXPORT jbooleanArray JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_refresh
   (JNIEnv *, jclass);
 
   /*

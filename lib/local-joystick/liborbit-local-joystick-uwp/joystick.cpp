@@ -18,10 +18,15 @@ joystick::~joystick()
 {
 }
 
-const char *joystick::getName()
+bool joystick::isConnected()
 {
   XINPUT_STATE state;
-  return read(state, index) ? "Xbox 360 Controller" : "Disconnected";
+  return read(state, index);
+}
+
+const char *joystick::getName()
+{
+  return isConnected() ? "Xbox 360 Controller" : "Disconnected";
 }
 
 double joystick::getAxis(int i)

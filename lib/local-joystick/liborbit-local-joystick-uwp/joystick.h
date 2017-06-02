@@ -8,6 +8,7 @@ private:
 public:
   joystick(size_t);
   ~joystick();
+  bool isConnected();
   const char *getName();
   double getAxis(int i);
   bool getButton(int i);
