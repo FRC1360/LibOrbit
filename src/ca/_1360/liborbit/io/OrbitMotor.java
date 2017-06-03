@@ -14,11 +14,11 @@ public final class OrbitMotor {
         currentEndpoint = (OrbitPipelineSimpleSource) OrbitFunctionUtilities.specialize(OrbitInputOutputManager.getProvider()::getCurrent, pdpPort)::get;
     }
 
-    public OrbitPipelineInputEndpoint getPowerEndpoint() {
+    public OrbitPipelineInputEndpoint getPower() {
         return powerEndpoint;
     }
 
-    public OrbitPipelineOutputEndpoint getCurrentEndpoint() {
+    public OrbitPipelineOutputEndpoint getCurrent() {
         return currentEndpoint;
     }
 }
