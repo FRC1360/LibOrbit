@@ -1,4 +1,4 @@
-package ca._1360.liborbit.util;
+package ca._1360.liborbit.util.control;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineComplexNodeBase;
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
