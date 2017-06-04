@@ -15,7 +15,7 @@ public final class OrbitPipelineManager {
 
     private OrbitPipelineManager() {}
 
-    static void updateEnabled(OrbitPipelineConnection connection, boolean enabled) throws OrbitPipelineInvalidConfigurationException {
+    static synchronized void updateEnabled(OrbitPipelineConnection connection, boolean enabled) throws OrbitPipelineInvalidConfigurationException {
         if (enabled)
             try {
                 connections.runBatch(enableOp(connection).getOperations());
@@ -26,7 +26,7 @@ public final class OrbitPipelineManager {
             connections.remove(connection);
     }
 
-    public static void updateAll() {
+    public static synchronized void updateAll() {
     	try {
 	        HashMap<OrbitPipelineOutputEndpoint, OptionalDouble> results = new HashMap<>();
 	        for (OrbitPipelineConnection connection : connections) {
@@ -41,11 +41,11 @@ public final class OrbitPipelineManager {
     	}
     }
     
-    public static void addExceptionHandler(Consumer<Exception> handler) {
+    public static synchronized void addExceptionHandler(Consumer<Exception> handler) {
     	exceptionHandlers.add(handler);
     }
 
-    public static void runBatch(BatchOperation[] operations) throws OrbitPipelineInvalidConfigurationException {
+    public static synchronized void runBatch(BatchOperation[] operations) throws OrbitPipelineInvalidConfigurationException {
         try {
             connections.runBatch(Arrays.stream(operations).map(BatchOperation::getOperations).flatMap(List::stream)::iterator);
         } catch (OrbitDirectedAcyclicGraph.BatchOperationException e) {
