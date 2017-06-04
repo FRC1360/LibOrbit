@@ -102,12 +102,18 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
         OrbitContainer<Integer> pos = new OrbitContainer<>(null);
         Stack<Relationship> removed = new Stack<>();
         return new BatchOperation(() -> {
-            pos.setValue(objects.indexOf(object));
-            objects.remove(pos.getValue().intValue());
-            relationships.forEach(OrbitFunctionUtilities.conditional(OrbitFunctionUtilities.combine(relationships::remove, removed::add), relationship -> relationship.getFrom() == object || relationship.getTo() == object));
+        	int index = objects.indexOf(object);
+        	pos.setValue(index);
+        	if (index != -1) {
+        		objects.remove(pos.getValue().intValue());
+            	relationships.forEach(OrbitFunctionUtilities.conditional(removed::add, relationship -> relationship.getFrom() == object || relationship.getTo() == object));
+            	removed.forEach(relationships::remove);
+        	}
         }, () -> {
-            objects.add(pos.getValue(), object);
-            relationships.addAll(removed);
+        	if (!pos.getValue().equals(-1)) {
+        		objects.add(pos.getValue(), object);
+            	relationships.addAll(removed);
+        	}
         });
     }
 
