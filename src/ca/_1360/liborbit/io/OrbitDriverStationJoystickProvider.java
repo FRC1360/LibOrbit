@@ -1,30 +1,29 @@
 package ca._1360.liborbit.io;
 
-public final class OrbitDriverStationJoystickProvider implements OrbitJoystickProvider {
+import edu.wpi.first.wpilibj.Joystick;
+
+public final class OrbitDriverStationJoystickProvider extends Joystick implements OrbitJoystickProvider {
     public OrbitDriverStationJoystickProvider(int id) {
+    	super(id);
     }
 
-    @Override
-    public String getName() {
-        return null;
-    }
+	@Override
+	public double getAxis(int i) {
+		return getRawAxis(i);
+	}
 
-    @Override
-    public double getAxis(int i) {
-        return 0;
-    }
+	@Override
+	public boolean getButton(int i) {
+		return getRawButton(i);
+	}
 
-    @Override
-    public boolean getButton(int i) {
-        return false;
-    }
+	@Override
+	public int getPov(int i) {
+		return getPOV(i);
+	}
 
-    @Override
-    public int getPov(int i) {
-        return 0;
-    }
-
-    @Override
-    public void setOutput(int i, boolean v) {
-    }
+	@Override
+	public void setRumble(int i, double v) {
+		setRumble(RumbleType.values()[i], v);
+	}
 }
