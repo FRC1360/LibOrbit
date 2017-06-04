@@ -4,12 +4,14 @@ import ca._1360.liborbit.util.OrbitDirectedAcyclicGraph;
 import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class OrbitPipelineManager {
     private final static OrbitDirectedAcyclicGraph<OrbitPipelineConnection> connections = new OrbitDirectedAcyclicGraph<>();
+    private final static ArrayList<Consumer<Exception>> exceptionHandlers = new ArrayList<>();
 
     private OrbitPipelineManager() {}
 
@@ -25,14 +27,22 @@ public final class OrbitPipelineManager {
     }
 
     public static void updateAll() {
-        HashMap<OrbitPipelineOutputEndpoint, OptionalDouble> results = new HashMap<>();
-        for (OrbitPipelineConnection connection : connections) {
-            OptionalDouble value = results.computeIfAbsent(connection.getSource(), OrbitPipelineOutputEndpoint::get);
-            if (value.isPresent())
-                connection.getDestination().accept(value.getAsDouble());
-            else
-                connection.getDestination().acceptNoInput();
-        }
+    	try {
+	        HashMap<OrbitPipelineOutputEndpoint, OptionalDouble> results = new HashMap<>();
+	        for (OrbitPipelineConnection connection : connections) {
+	            OptionalDouble value = results.computeIfAbsent(connection.getSource(), OrbitPipelineOutputEndpoint::get);
+	            if (value.isPresent())
+	                connection.getDestination().accept(value.getAsDouble());
+	            else
+	                connection.getDestination().acceptNoInput();
+	        }
+    	} catch (Exception e) {
+    		exceptionHandlers.forEach(handler -> handler.accept(e));
+    	}
+    }
+    
+    public static void addExceptionHandler(Consumer<Exception> handler) {
+    	exceptionHandlers.add(handler);
     }
 
     public static void runBatch(BatchOperation[] operations) throws OrbitPipelineInvalidConfigurationException {
