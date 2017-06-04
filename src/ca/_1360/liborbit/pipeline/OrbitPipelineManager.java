@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 
 public final class OrbitPipelineManager {
     private final static OrbitDirectedAcyclicGraph<OrbitPipelineConnection> connections = new OrbitDirectedAcyclicGraph<>();
-    private final static ArrayList<Consumer<Exception>> exceptionHandlers = new ArrayList<>();
+    private final static ArrayList<Consumer<Throwable>> exceptionHandlers = new ArrayList<>();
 
     private OrbitPipelineManager() {}
 
@@ -36,12 +36,12 @@ public final class OrbitPipelineManager {
 	            else
 	                connection.getDestination().acceptNoInput();
 	        }
-    	} catch (Exception e) {
-    		exceptionHandlers.forEach(handler -> handler.accept(e));
+    	} catch (Throwable t) {
+    		exceptionHandlers.forEach(handler -> handler.accept(t));
     	}
     }
     
-    public static synchronized void addExceptionHandler(Consumer<Exception> handler) {
+    public static synchronized void addExceptionHandler(Consumer<Throwable> handler) {
     	exceptionHandlers.add(handler);
     }
 
