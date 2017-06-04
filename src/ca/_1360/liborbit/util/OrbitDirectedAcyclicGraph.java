@@ -64,6 +64,8 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     }
 
     protected final Relationship createRelationshipCore(T from, T to) {
+    	if (relationships.stream().anyMatch(r -> r.from == from && r.to == to))
+    		return null;
         Relationship relationship = new Relationship(from, to);
         relationships.add(relationship);
         return relationship;
@@ -95,7 +97,13 @@ public class OrbitDirectedAcyclicGraph<T> implements Iterable<T> {
     }
 
     public final BatchOperation addOp(T object) {
-        return new BatchOperation(OrbitFunctionUtilities.specialize((Consumer<T>) objects::add, object), OrbitFunctionUtilities.specialize((Consumer<T>) objects::remove, object));
+    	OrbitContainer<Boolean> isNew = new OrbitContainer<Boolean>(true);
+        return new BatchOperation(() -> {
+        	if (objects.contains(object))
+        		isNew.setValue(false);
+        	else
+        		objects.add(object);
+        }, OrbitFunctionUtilities.conditional(OrbitFunctionUtilities.specialize((Consumer<T>) objects::remove, object), isNew::getValue));
     }
 
     public final BatchOperation removeOp(T object) {
