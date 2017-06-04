@@ -1,5 +1,6 @@
 package ca._1360.liborbit.pipeline;
 
+import ca._1360.liborbit.OrbitRealRobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class OrbitPipelineSmartDashboardExportConnector implements OrbitPipelineInputEndpoint {
@@ -11,6 +12,7 @@ public class OrbitPipelineSmartDashboardExportConnector implements OrbitPipeline
 	
 	@Override
 	public void accept(double value) {
-		SmartDashboard.putNumber(label, value);
+		if (OrbitRealRobotBase.isReal())
+			SmartDashboard.putNumber(label, value);
 	}
 }
