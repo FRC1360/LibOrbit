@@ -1,5 +1,6 @@
 package ca._1360.liborbit.io;
 
+import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
 import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
 
 public class OrbitXbox360Controller extends OrbitJoystickBase {
@@ -80,11 +81,11 @@ public class OrbitXbox360Controller extends OrbitJoystickBase {
     	return getPov(0);
     }
     
-    public void vibrateLeft(boolean on) {
-    	setOutput(0, on);
+    public OrbitPipelineInputEndpoint getLeftRumble() {
+    	return getRumble(0);
     }
     
-    public void vibrateRight(boolean on) {
-    	setOutput(1, on);
+    public OrbitPipelineInputEndpoint getRightRumble() {
+    	return getRumble(1);
     }
 }

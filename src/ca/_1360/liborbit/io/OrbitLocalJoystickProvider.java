@@ -27,6 +27,9 @@ public final class OrbitLocalJoystickProvider implements OrbitJoystickProvider {
 
     @Override
     public native void setOutput(int i, boolean v);
+
+	@Override
+	public native void setRumble(int i, double v);
     
     public static native boolean[] refresh();
     

@@ -49,6 +49,14 @@ extern "C" {
 
   /*
   * Class:     ca__1360_liborbit_io_OrbitLocalJoystickProvider
+  * Method:    setRumble
+  * Signature: (ID)V
+  */
+  JNIEXPORT void JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_setRumble
+  (JNIEnv *, jobject, jint, jdouble);
+
+  /*
+  * Class:     ca__1360_liborbit_io_OrbitLocalJoystickProvider
   * Method:    refresh
   * Signature: ()[Z
   */

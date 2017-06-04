@@ -41,6 +41,11 @@ extern "C" {
     joysticks[getId(env, self)].setOutput(i, value);
   }
 
+  JNIEXPORT void JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_setRumble(JNIEnv *env, jobject self, jint i, jdouble value)
+  {
+    joysticks[getId(env, self)].setRumble(i, value);
+  }
+
   JNIEXPORT jbooleanArray JNICALL Java_ca__11360_liborbit_io_OrbitLocalJoystickProvider_refresh(JNIEnv *env, jclass joystickClass)
   {
     jbooleanArray array = env->NewBooleanArray(4);

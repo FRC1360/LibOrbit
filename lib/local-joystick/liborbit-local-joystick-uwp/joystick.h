@@ -14,4 +14,5 @@ public:
   bool getButton(int i);
   int getPov(int i);
   void setOutput(int i, bool v);
+  void setRumble(int i, jdouble v);
 };

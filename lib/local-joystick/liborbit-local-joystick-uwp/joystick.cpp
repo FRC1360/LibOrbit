@@ -84,12 +84,16 @@ int joystick::getPov(int i)
 
 void joystick::setOutput(int i, bool v)
 {
+}
+
+void joystick::setRumble(int i, jdouble v)
+{
   switch (i) {
   case 0:
-    vibration.wLeftMotorSpeed = v ? 65535 : 0;
+    vibration.wLeftMotorSpeed = (WORD)(v * 65535);
     break;
   case 1:
-    vibration.wRightMotorSpeed = v ? 65535 : 0;
+    vibration.wRightMotorSpeed = (WORD)(v * 65535);
     break;
   }
   XInputSetState(index, &vibration);

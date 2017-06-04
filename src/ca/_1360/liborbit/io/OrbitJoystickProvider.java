@@ -6,4 +6,5 @@ public interface OrbitJoystickProvider {
     boolean getButton(int i);
     int getPov(int i);
     void setOutput(int i, boolean v);
+    void setRumble(int i, double v);
 }

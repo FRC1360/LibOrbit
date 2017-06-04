@@ -85,6 +85,11 @@ public final class OrbitRealInputOutputProvider implements OrbitInputOutputProvi
 		public int getPov(int i) {
 			return getPOV(i);
 		}
+
+		@Override
+		public void setRumble(int i, double v) {
+			setRumble(RumbleType.values()[i], v);
+		}
     }
     
     private final class EncoderPortSpecification {
