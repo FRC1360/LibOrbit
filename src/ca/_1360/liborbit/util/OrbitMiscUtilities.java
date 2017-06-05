@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitMiscUtilities.java
+ * Miscellaneous utilities
+ */
+
 package ca._1360.liborbit.util;
 
 import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
@@ -17,16 +24,25 @@ import java.util.stream.StreamSupport;
 public final class OrbitMiscUtilities {
     private OrbitMiscUtilities() { }
 
+    /**
+     * @param iterator An iterator to generate a stream from
+     * @return a stream that retrieves data from the given iterator
+     */
     public static <T> Stream<T> stream(Iterator<T> iterator) {
         return StreamSupport.stream(((Iterable<T>) () -> iterator).spliterator(), false);
     }
 
+    /**
+     * @param supplier A supplier of elements
+     * @return A stream that retrieves data from the given supplier, until it returns an empty optional
+     */
     public static <T> Stream<T> stream(Supplier<Optional<T>> supplier) {
         return stream(new Iterator<T>() {
             T _next;
 
             @Override
             public boolean hasNext() {
+            	// Ensure supplier is only accessed once per element
                 if (_next == null) {
                     Optional<T> value = supplier.get();
                     if (value.isPresent()) {
@@ -49,11 +65,21 @@ public final class OrbitMiscUtilities {
         });
     }
 
+    /**
+     * @param streams Streams to be concatenated
+     * @return A concatenated stream
+     */
     @SafeVarargs
     public static <T> Stream<T> concat(Stream<? extends T>... streams) {
         return Arrays.stream(streams).map(OrbitFunctionUtilities.<Stream<? extends T>, Function<? super T, T>, Stream<T>>specializeSecond(Stream::map, Function.<T>identity())).reduce(Stream::concat).orElse(Stream.empty());
     }
 
+    /**
+     * @param stream The stream to read from
+     * @param count The number of bytes to read
+     * @return An array of the bytes that were read
+     * @throws IOException Thrown by the stream
+     */
     public static byte[] readBytes(InputStream stream, int count) throws IOException {
         byte[] bytes = new byte[count];
         int r = 0;
@@ -62,6 +88,12 @@ public final class OrbitMiscUtilities {
         return bytes;
     }
 
+    /**
+     * Attempts to stop the given thread, throwing an exception if interrupted
+     * @param t The thread to stop
+     * @param interruptErrorMessage The error message to use if stopping fails
+     * @throws InterruptedIOException Thrown if stopping fails
+     */
     public static void tryStop(Thread t, String interruptErrorMessage) throws InterruptedIOException {
         t.interrupt();
         try {
