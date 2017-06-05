@@ -1,12 +1,24 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitXbox360Controller.java
+ * An API for accessing Xbox 360 controllers in a real or emulated environment
+ */
+
 package ca._1360.liborbit.io;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
 import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
 
 public class OrbitXbox360Controller extends OrbitJoystickBase {
+	/**
+	 * @param port The controller's port
+	 */
 	public OrbitXbox360Controller(int port) {
 		super(port);
 	}
+	
+	// Accessor methods for property values and pipeline endpoints
 	
     public OrbitPipelineOutputEndpoint getLeftXAxis() {
         return getAxis(0);

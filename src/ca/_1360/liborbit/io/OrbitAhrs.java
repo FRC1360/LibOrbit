@@ -1,9 +1,18 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitAhrs.java
+ * An API for accessing the real or emulated Altitude and Heading Reference System (AHRS)
+ */
+
 package ca._1360.liborbit.io;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
 
 public final class OrbitAhrs {
     private final OrbitAhrsProvider provider = OrbitInputOutputManager.getProvider().getAhrs();
+    
+    // Pipeline endpoints for each property which correspond with getter functions on the provider
     private final OrbitPipelineOutputEndpoint continuousAngleEndpoint = provider::getContinuousAngle;
     private final OrbitPipelineOutputEndpoint yawEndpoint = provider::getYaw;
     private final OrbitPipelineOutputEndpoint pitchEndpoint = provider::getPitch;
@@ -25,7 +34,7 @@ public final class OrbitAhrs {
     private final OrbitPipelineOutputEndpoint rawMagZEndpoint = provider::getRawMagZ;
     private final OrbitPipelineOutputEndpoint barometricPressureEndpoint = provider::getBarometricPressure;
     
-    public OrbitAhrs() { }
+    // Accessor method for each endpoint
 
     public OrbitPipelineOutputEndpoint getContinuousAngle() {
         return continuousAngleEndpoint;

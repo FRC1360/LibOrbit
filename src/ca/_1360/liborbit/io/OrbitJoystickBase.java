@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitJoystickBase.java
+ * Base class for model-specific joystick APIs
+ */
+
 package ca._1360.liborbit.io;
 
 import java.util.HashMap;
@@ -9,16 +16,25 @@ import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
 public abstract class OrbitJoystickBase {
     private final OrbitJoystickProvider provider;
+    // Pipeline endpoints are stored in maps to prevent duplication
     private final HashMap<Integer, OrbitPipelineOutputEndpoint> axes = new HashMap<>();
     private final HashMap<Integer, OrbitPipelineInputEndpoint> rumbles = new HashMap<>();
 
+    /**
+     * @param id The joystick's port
+     */
     public OrbitJoystickBase(int id) {
         provider = OrbitInputOutputManager.getProvider().getJoystick(id);
     }
     
+    /**
+     * @return The joystick's name
+     */
     public final String getName() {
     	return provider.getName();
     }
+    
+    // Accessor method for values and pipeline endpoints
     
     protected final OrbitPipelineOutputEndpoint getAxis(int i) {
     	return axes.computeIfAbsent(i, _i -> () -> OptionalDouble.of(provider.getAxis(i)));

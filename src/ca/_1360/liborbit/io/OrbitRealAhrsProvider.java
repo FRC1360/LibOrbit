@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitRealAhrsProvider.java
+ * Provides access to an AHRS on a real robot
+ */
+
 package ca._1360.liborbit.io;
 
 import java.util.OptionalDouble;
@@ -7,9 +14,14 @@ import com.kauailabs.navx.frc.AHRS;
 public class OrbitRealAhrsProvider implements OrbitAhrsProvider {
 	private AHRS ahrs;
 	
+	/**
+	 * @param ahrs The raw AHRS object
+	 */
 	public OrbitRealAhrsProvider(AHRS ahrs) {
 		this.ahrs = ahrs;
 	}
+	
+	// Accessor methods for properties
 
 	@Override
 	public OptionalDouble getContinuousAngle() {
