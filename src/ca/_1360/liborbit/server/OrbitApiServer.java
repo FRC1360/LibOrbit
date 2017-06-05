@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitApiServer.java
+ * A local API server
+ */
+
 package ca._1360.liborbit.server;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
@@ -27,6 +34,10 @@ public final class OrbitApiServer implements Closeable {
 	private final Thread acceptThread;
 	private final Thread processThread;
 
+	/**
+	 * @param port The local TCP port to listen on
+	 * @throws IOException Thrown if there is a problem setting up the listener
+	 */
 	public OrbitApiServer(int port) throws IOException {
 		serverSocket = new ServerSocket(port);
 		acceptThread = new Thread(this::runAccept);
@@ -36,6 +47,10 @@ public final class OrbitApiServer implements Closeable {
 
 	}
 
+	/**
+	 * @param label The label on the input to access
+	 * @return An output endpoint giving access to the named input
+	 */
 	public synchronized OrbitPipelineOutputEndpoint getInput(String label) {
 		return inputs.computeIfAbsent(label, _label -> {
 			InputEndpoint endpoint = new InputEndpoint(label);
@@ -44,10 +59,18 @@ public final class OrbitApiServer implements Closeable {
 		});
 	}
 
+	/**
+	 * @param label The label on the output to access
+	 * @return An input endpoint giving access to the named output
+	 */
 	public synchronized OrbitPipelineInputEndpoint getOutput(String label) {
 		return outputs.computeIfAbsent(label, OutputEndpoint::new);
 	}
 
+	/**
+	 * @param label The label on the input to remove
+	 * @throws OrbitPipelineInvalidConfigurationException Should never be thrown
+	 */
 	public synchronized void removeInput(String label) throws OrbitPipelineInvalidConfigurationException {
 		InputEndpoint endpoint = inputs.remove(label);
 		if (endpoint != null)
@@ -55,6 +78,10 @@ public final class OrbitApiServer implements Closeable {
 		push(new RemoveUpdate(endpoint));
 	}
 
+	/**
+	 * @param label The label on the input to remove
+	 * @throws OrbitPipelineInvalidConfigurationException Should never be thrown
+	 */
 	public synchronized void removeOutput(String label) throws OrbitPipelineInvalidConfigurationException {
 		OutputEndpoint endpoint = outputs.remove(label);
 		if (endpoint != null) {
@@ -64,14 +91,23 @@ public final class OrbitApiServer implements Closeable {
 		push(new RemoveUpdate(endpoint));
 	}
 
+	/**
+	 * @param update An update to push to all clients
+	 */
 	public synchronized void push(OrbitApiUpdate update) {
 		updateQueue.offer(update);
 	}
 
+	/**
+	 * @return An array of the connected clients
+	 */
 	public synchronized OrbitApiClient[] getClients() {
 		return connections.toArray(new OrbitApiClient[0]);
 	}
 
+	/**
+	 * A thread that loops accepting new clients
+	 */
 	private void runAccept() {
 		while (true)
 			try {
@@ -85,6 +121,9 @@ public final class OrbitApiServer implements Closeable {
 			}
 	}
 
+	/**
+	 * A thread that loops dispatching updates
+	 */
 	private void runProcess() {
 		while (true) {
 			OrbitApiUpdate update = null;
@@ -100,50 +139,89 @@ public final class OrbitApiServer implements Closeable {
 		}
 	}
 
+	/**
+	 * To be called by a client when it is disconnecting
+	 * @param client The client to disconnect
+	 */
 	synchronized void disconnect(OrbitApiClient client) {
 		connections.remove(client);
 	}
 
+	/**
+	 * @param input The label on the input to update
+	 * @param value The new value of the input
+	 */
 	synchronized void updateInput(String input, double value) {
 		inputs.get(input).setValue(value);
 	}
 
+	/* (non-Javadoc)
+	 * @see java.io.Closeable#close()
+	 */
 	@Override
 	public void close() throws IOException {
+		// Attempt to stop threads
 		OrbitMiscUtilities.tryStop(acceptThread, "Failed to stop the connection accepting thread");
 		OrbitMiscUtilities.tryStop(processThread, "Failed to stop the update processing thread");
+		// Stop listening
 		serverSocket.close();
+		// Close all connections
 		connections.forEach(OrbitFunctionUtilities.wrapException(Closeable::close, UncheckedIOException::new));
+		// Remove all inputs and outputs
 		inputs.keySet().forEach(OrbitFunctionUtilities.wrapException(this::removeInput, RuntimeException::new));
 		outputs.keySet().forEach(OrbitFunctionUtilities.wrapException(this::removeOutput, RuntimeException::new));
 	}
 	
+	/**
+	 * Base class for inputs and outputs
+	 */
 	private abstract class EndpointBase {
 		protected final String label;
 		protected double value;
 		protected boolean updating;
 		
+		/**
+		 * @param label The endpoint's label
+		 */
 		public EndpointBase(String label) {
 			this.label = label;
 		}
 		
+		/**
+		 * @return The endpoint's label
+		 */
 		public final String getLabel() {
 			return label;
 		}
 
+		/**
+		 * @param updating True if an update is being processed
+		 */
 		protected final synchronized void setUpdating(boolean updating) {
 			this.updating = updating;
 		}
 
+		/**
+		 * Stops the dispatching of updates
+		 */
 		public final synchronized void stop() {
 			setUpdating(true);
 		}
 
+		/**
+		 * An update to the endpoint's value
+		 */
 		protected final class Update extends OrbitApiSimpleUpdateBase {
+			/**
+			 * @param channel The MCS channel on which to dispatch the update
+			 */
 			public Update(int channel) {
 				super(channel);
 			}
 
+			/* (non-Javadoc)
+			 * @see ca._1360.liborbit.server.OrbitApiSimpleUpdateBase#writePayload(java.io.DataOutputStream)
+			 */
 			@Override
 			protected void writePayload(DataOutputStream output) throws IOException {
 				output.writeUTF(label);
@@ -155,27 +233,49 @@ public final class OrbitApiServer implements Closeable {
 		}
 	}
 
+	/**
+	 * An input
+	 */
 	private final class InputEndpoint extends EndpointBase implements OrbitPipelineOutputEndpoint {
+		/**
+		 * @param label The input's label
+		 */
 		public InputEndpoint(String label) {
 			super(label);
 		}
 
+		/* (non-Javadoc)
+		 * @see java.util.function.Supplier#get()
+		 */
 		@Override
 		public OptionalDouble get() {
+			// Treat NaN as empty
 			return Double.isNaN(value) ? OptionalDouble.empty() : OptionalDouble.of(value);
 		}
 
+		/**
+		 * @param value The new value of the input
+		 */
 		public void setValue(Double value) {
 			this.value = value;
 			push(new Update(1));
 		}
 	}
 
+	/**
+	 * An output
+	 */
 	private final class OutputEndpoint extends EndpointBase implements OrbitPipelineInputEndpoint {
+		/**
+		 * @param label The output's label
+		 */
 		public OutputEndpoint(String label) {
 			super(label);
 		}
 
+		/* (non-Javadoc)
+		 * @see java.util.function.DoubleConsumer#accept(double)
+		 */
 		@Override
 		public synchronized void accept(double v) {
 			value = v;
@@ -186,19 +286,31 @@ public final class OrbitApiServer implements Closeable {
 		}
 	}
 	
+	/**
+	 * An update that removes an input or output
+	 */
 	private final class RemoveUpdate extends OrbitApiSimpleUpdateBase {
 		private final String label;
 		
+		/**
+		 * @param input The input to remove
+		 */
 		public RemoveUpdate(InputEndpoint input) {
 			super(2);
 			label = input.getLabel();
 		}
 		
+		/**
+		 * @param output The output to remove
+		 */
 		public RemoveUpdate(OutputEndpoint output) {
 			super(3);
 			label = output.getLabel();
 		}
 
+		/* (non-Javadoc)
+		 * @see ca._1360.liborbit.server.OrbitApiSimpleUpdateBase#writePayload(java.io.DataOutputStream)
+		 */
 		@Override
 		protected void writePayload(DataOutputStream output) throws IOException {
 			output.writeUTF(label);

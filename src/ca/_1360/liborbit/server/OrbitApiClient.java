@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitApiClient.java
+ * A client that is connected to a local API server
+ */
+
 package ca._1360.liborbit.server;
 
 import ca._1360.liborbit.util.OrbitMultiChannelStream;
@@ -16,6 +23,11 @@ public final class OrbitApiClient implements Closeable {
     private final HashMap<Integer, DataOutputStream> dataOutputStreamMap = new HashMap<>();
     private final Thread processThread;
 
+    /**
+     * @param server The local API server
+     * @param socket The connection socket
+     * @throws IOException Thrown in connection setup goes wrong
+     */
     OrbitApiClient(OrbitApiServer server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
@@ -24,18 +36,31 @@ public final class OrbitApiClient implements Closeable {
         processThread.start();
     }
 
+    /**
+     * @return The local API server
+     */
     public OrbitApiServer getServer() {
         return server;
     }
 
+    /**
+     * @return The client's IP address
+     */
     public InetAddress remoteAddress() {
         return socket.getInetAddress();
     }
 
+    /**
+     * @param update The update to push
+     * @throws IOException Thrown if there is an issue sending the update
+     */
     void push(OrbitApiUpdate update) throws IOException {
         update.write(OrbitFunctionUtilities.specializeSecond(dataOutputStreamMap::computeIfAbsent, ((Function<Integer, OutputStream>) mcs::getOutputStream).andThen(DataOutputStream::new))::apply);
     }
     
+    /**
+     * A thread that loops reading input updates
+     */
     private void runProcess() {
     	DataInputStream data = new DataInputStream(mcs.getInputStream(1));
     	while (true) {
@@ -47,6 +72,9 @@ public final class OrbitApiClient implements Closeable {
     	}
     }
 
+    /* (non-Javadoc)
+     * @see java.io.Closeable#close()
+     */
     @Override
     public void close() throws IOException {
         server.disconnect(this);
