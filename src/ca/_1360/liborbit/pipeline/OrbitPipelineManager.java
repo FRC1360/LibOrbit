@@ -29,13 +29,14 @@ public final class OrbitPipelineManager {
     public static synchronized void updateAll() {
     	try {
 	        HashMap<OrbitPipelineOutputEndpoint, OptionalDouble> results = new HashMap<>();
-	        for (OrbitPipelineConnection connection : connections) {
+	        List<Runnable> todo = connections.stream().<Runnable>map(connection -> () -> {
 	            OptionalDouble value = results.computeIfAbsent(connection.getSource(), OrbitPipelineOutputEndpoint::get);
 	            if (value.isPresent())
 	                connection.getDestination().accept(value.getAsDouble());
 	            else
 	                connection.getDestination().acceptNoInput();
-	        }
+	        }).collect(Collectors.toList());
+	        todo.forEach(Runnable::run);
     	} catch (Throwable t) {
     		exceptionHandlers.forEach(handler -> handler.accept(t));
     	}
