@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitFunctionUtilities.java
+ * Utilities that work with functional interfaces
+ */
+
 package ca._1360.liborbit.util.function;
 
 import java.util.Arrays;
@@ -5,6 +12,10 @@ import java.util.function.*;
 
 public final class OrbitFunctionUtilities {
     private OrbitFunctionUtilities() { }
+    
+    // Exception wrapping methods: generate a non-exceptional functional interface from an exceptional one by providing a function to wrap the throwable in an unchecked exception
+    
+    // Exception handling methods: generate a non-exceptional functional interface from an exceptional one by providing a consumer to handle the throwable that occurs
 
     public static <T, E extends Throwable> Consumer<T> wrapException(OrbitExceptionalConsumer<? super T, ? extends E> consumer, Function<? super E, ? extends RuntimeException> wrapper) {
         return t -> {
@@ -170,6 +181,8 @@ public final class OrbitFunctionUtilities {
             }
         };
     }
+    
+    // Specialization methods: specify the value for first, second, both, or only parameter(s) of a functional interface; exceptional versions are suffixed with -Ex  
 
     public static <T, U> Consumer<U> specializeFirst(BiConsumer<? super T, ? super U> biConsumer, T t) {
         return u -> biConsumer.accept(t, u);
@@ -266,6 +279,8 @@ public final class OrbitFunctionUtilities {
     public static <T, U, E extends Throwable> OrbitExceptionalSupplier<Boolean, E> specializeEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, T t, U u) {
         return () -> biPredicate.test(t, u);
     }
+    
+    // Supplier specialization methods: specify a supplier to produce the first, second, both, or only parameter(s) of a functional interface; exceptional versions are suffixed with -Ex
 
     public static <T, U> Consumer<U> specializeFirstSupplier(BiConsumer<? super T, ? super U> biConsumer, Supplier<T> t) {
         return u -> biConsumer.accept(t.get(), u);
@@ -362,6 +377,8 @@ public final class OrbitFunctionUtilities {
     public static <T, U, E extends Throwable> OrbitExceptionalSupplier<Boolean, E> specializeSupplierEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, Supplier<T> t, Supplier<U> u) {
         return () -> biPredicate.test(t.get(), u.get());
     }
+    
+    // Source supplying methods: produce a single-parameter functional interface from a dual-parameter one by providing a function to map each parameter; exceptional versions are suffixed with -Ex
 
     public static <T, U, V> Consumer<V> source(BiConsumer<? super T, ? super U> biConsumer, Function<? super V, ? extends T> tAdapter, Function<? super V, ? extends U> uAdapter) {
         return v -> biConsumer.accept(tAdapter.apply(v), uAdapter.apply(v));
@@ -410,6 +427,12 @@ public final class OrbitFunctionUtilities {
     public static <T, U, V, W, E extends Throwable> OrbitExceptionalBiPredicate<V, W, E> sourceEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E> biPredicate, OrbitExceptionalBiFunction<? super V, ? super W, ? extends T, ? extends E> tAdapter, OrbitExceptionalBiFunction<? super V, ? super W, ? extends U, ? extends E> uAdapter) {
         return (v, w) -> biPredicate.test(tAdapter.apply(v, w), uAdapter.apply(v, w));
     }
+    
+    // Combining methods: produce a single result-less functional interface from multiple that executes them in order; exceptional versions are suffixed with -Ex
+    
+    // Composing methods: produce a single function from multiple that executes them in order, using the result of each as the parameter for the next; all values must be the same type due to java generics limitations; exceptional versions are suffixed with -Ex
+    
+    // All/any methods: produce a single predicate-type functional interface from multiple that requires that all or any to approve the parameter(s); exceptional versions are suffixed with -Ex
 
     public static Runnable combine(Runnable... runnables) {
         return Arrays.stream(runnables).reduce((a, b) -> () -> {
@@ -492,6 +515,8 @@ public final class OrbitFunctionUtilities {
     public static <T, U, E extends Throwable> OrbitExceptionalBiPredicate<T, U, E> anyEx(OrbitExceptionalBiPredicate<? super T, ? super U, ? extends E>... biPredicates) {
         return Arrays.stream(biPredicates).map(biPredicate -> (OrbitExceptionalBiPredicate<T, U, E>) biPredicate::test).reduce(OrbitExceptionalBiPredicate::or).orElse(OrbitExceptionalBiPredicate.never());
     }
+    
+    // Conditional methods: produce a result-less functional interface from an equivalent that executes it only if the given boolean supplier or predicate-type functional interface approves; exceptional versions are suffixed with -Ex
     
     public static Runnable conditional(Runnable runnable, BooleanSupplier condition) {
         return () -> {
