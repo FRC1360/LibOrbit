@@ -1,3 +1,10 @@
+/*
+ * Name: Nicholas Mertin
+ * Course: ICS4U
+ * OrbitPid.java
+ * A pipeline-based Proportional-Integral-Derivative controller
+ */
+
 package ca._1360.liborbit.util.control;
 
 import ca._1360.liborbit.pipeline.*;
@@ -25,7 +32,16 @@ public final class OrbitPid {
     private final OrbitUnaryOperatorFilter absError = new OrbitUnaryOperatorFilter(Math::abs);
     private final OrbitSimpleStateMachine<OrbitStateMachineSimpleStates> integralControlStateMachine;
 
+    /**
+     * @param kP The initial proportional term coefficient
+     * @param kI The initial integral term coefficient
+     * @param kD The initial derivative term coefficient
+     * @param kIInner The initial integral lower absolute error threshold
+     * @param kIOuter The initial integral upper absolute error threshold
+     * @param target The initial target
+     */
     public OrbitPid(double kP, double kI, double kD, double kIInner, double kIOuter, double target) {
+    	// Supply initial values
         pScale.getInput2().accept(kP);
         iScale.getInput2().accept(kI);
         dScale.getInput2().accept(kD);
@@ -33,6 +49,7 @@ public final class OrbitPid {
         outer.accept(kIOuter);
         error.getInput1().accept(target);
         try {
+        	// Create state machine
             OrbitStateMachineSimpleStates enabled = OrbitStateMachineSimpleStates.create(() -> {}, () -> {}, Collections.singletonList(new OrbitPipelineConnection(addID.getOutput(), addMain.getInput2(), false)), Collections.emptyList());
             OrbitStateMachineSimpleStates disabled = OrbitStateMachineSimpleStates.create(() -> {}, () -> {}, Collections.singletonList(new OrbitPipelineConnection(derivative, addMain.getInput2(), false)), Collections.emptyList());
             integralControlStateMachine = new OrbitSimpleStateMachine<>(Arrays.asList(enabled, disabled));
@@ -40,12 +57,13 @@ public final class OrbitPid {
                 if (newState == enabled)
                     integral.reset();
             });
+            // Add connections as a batch operation to only invalidate the DAG once
             OrbitPipelineManager.runBatch(new OrbitPipelineManager.BatchOperation[]{
-                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), integral, true)),
-                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), derivative, true)),
-                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), pScale.getInput1(), true)),
-                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(integral, iScale.getInput1(), true)),
-                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(derivative, dScale.getInput1(), true)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), integral, false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), derivative, false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(error.getOutput(), pScale.getInput1(), false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(integral, iScale.getInput1(), false)),
+                    OrbitPipelineManager.enableOp(new OrbitPipelineConnection(derivative, dScale.getInput1(), false)),
                     OrbitPipelineManager.enableOp(new OrbitPipelineConnection(pScale.getOutput(), addMain.getInput1(), false)),
                     OrbitPipelineManager.enableOp(new OrbitPipelineConnection(iScale.getOutput(), addID.getInput1(), false)),
                     OrbitPipelineManager.enableOp(new OrbitPipelineConnection(dScale.getOutput(), addID.getInput2(), false)),
@@ -56,6 +74,8 @@ public final class OrbitPid {
             throw new RuntimeException(e);
         }
     }
+    
+    // Accessor methods for pipeline endpoints
 
     public OrbitPipelineInputEndpoint getkP() {
         return pScale.getInput2();
