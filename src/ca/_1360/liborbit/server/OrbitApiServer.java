@@ -8,151 +8,200 @@ import ca._1360.liborbit.util.OrbitMiscUtilities;
 import ca._1360.liborbit.util.function.OrbitFunctionUtilities;
 
 import java.io.Closeable;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.OptionalDouble;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public final class OrbitApiServer implements Closeable {
-    private final ServerSocket serverSocket;
-    private final HashMap<String, InputEndpoint> inputs = new HashMap<>();
-    private final HashMap<String, OutputEndpoint> outputs = new HashMap<>();
-    private final LinkedBlockingQueue<OrbitApiUpdate> updateQueue = new LinkedBlockingQueue<>();
-    private final ArrayList<OrbitApiClient> connections = new ArrayList<>();
-    private final Thread acceptThread;
-    private final Thread processThread;
+	private final ServerSocket serverSocket;
+	private final HashMap<String, InputEndpoint> inputs = new HashMap<>();
+	private final HashMap<String, OutputEndpoint> outputs = new HashMap<>();
+	private final LinkedBlockingQueue<OrbitApiUpdate> updateQueue = new LinkedBlockingQueue<>();
+	private final ArrayList<OrbitApiClient> connections = new ArrayList<>();
+	private final Thread acceptThread;
+	private final Thread processThread;
 
-    public OrbitApiServer(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        acceptThread = new Thread(this::runAccept);
-        acceptThread.start();
-        processThread = new Thread(this::runProcess);
-        processThread.start();
-    }
+	public OrbitApiServer(int port) throws IOException {
+		serverSocket = new ServerSocket(port);
+		acceptThread = new Thread(this::runAccept);
+		acceptThread.start();
+		processThread = new Thread(this::runProcess);
+		processThread.start();
 
-    public synchronized OrbitPipelineInputEndpoint getInput(String label) {
-        return inputs.computeIfAbsent(label, l -> new InputEndpoint());
-    }
+	}
 
-    public synchronized OrbitPipelineOutputEndpoint getOutput(String label) {
-        return outputs.computeIfAbsent(label, l -> new OutputEndpoint());
-    }
+	public synchronized OrbitPipelineOutputEndpoint getInput(String label) {
+		return inputs.computeIfAbsent(label, _label -> {
+			InputEndpoint endpoint = new InputEndpoint(label);
+			endpoint.setValue(0.0);
+			return endpoint;
+		});
+	}
 
-    public synchronized void removeInput(String label) throws OrbitPipelineInvalidConfigurationException {
-        InputEndpoint endpoint = inputs.remove(label);
-        if (endpoint != null) {
-            endpoint.stop();
-            OrbitPipelineManager.disconnect(endpoint);
-        }
-    }
+	public synchronized OrbitPipelineInputEndpoint getOutput(String label) {
+		return outputs.computeIfAbsent(label, OutputEndpoint::new);
+	}
 
-    public synchronized void removeOutput(String label) throws OrbitPipelineInvalidConfigurationException {
-        OutputEndpoint endpoint = outputs.remove(label);
-        if (endpoint != null)
-            OrbitPipelineManager.disconnect(endpoint);
-    }
+	public synchronized void removeInput(String label) throws OrbitPipelineInvalidConfigurationException {
+		InputEndpoint endpoint = inputs.remove(label);
+		if (endpoint != null)
+			OrbitPipelineManager.disconnect(endpoint);
+		push(new RemoveUpdate(endpoint));
+	}
 
-    public synchronized void push(OrbitApiUpdate update) {
-        updateQueue.offer(update);
-    }
+	public synchronized void removeOutput(String label) throws OrbitPipelineInvalidConfigurationException {
+		OutputEndpoint endpoint = outputs.remove(label);
+		if (endpoint != null) {
+			endpoint.stop();
+			OrbitPipelineManager.disconnect(endpoint);
+		}
+		push(new RemoveUpdate(endpoint));
+	}
 
-    public synchronized OrbitApiClient[] getClients() {
-        return connections.toArray(new OrbitApiClient[0]);
-    }
+	public synchronized void push(OrbitApiUpdate update) {
+		updateQueue.offer(update);
+	}
 
-    private void runAccept() {
-        while (true)
-            try {
-                Socket socket = serverSocket.accept();
-                OrbitApiClient client = new OrbitApiClient(this, socket);
-                synchronized (this) {
-                    connections.add(client);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-    }
+	public synchronized OrbitApiClient[] getClients() {
+		return connections.toArray(new OrbitApiClient[0]);
+	}
 
-    private void runProcess() {
-        while (true) {
-            OrbitApiUpdate update = null;
-            do try {
-                update = updateQueue.take();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            while (update == null);
-            connections.forEach(OrbitFunctionUtilities.specializeSecond(OrbitFunctionUtilities.wrapException(OrbitApiClient::push, UncheckedIOException::new), update));
-        }
-    }
+	private void runAccept() {
+		while (true)
+			try {
+				Socket socket = serverSocket.accept();
+				OrbitApiClient client = new OrbitApiClient(this, socket);
+				synchronized (this) {
+					connections.add(client);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+	}
 
-    synchronized void disconnect(OrbitApiClient client) {
-        connections.remove(client);
-    }
+	private void runProcess() {
+		while (true) {
+			OrbitApiUpdate update = null;
+			do
+				try {
+					update = updateQueue.take();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			while (update == null);
+			connections.forEach(OrbitFunctionUtilities.specializeSecond(
+					OrbitFunctionUtilities.wrapException(OrbitApiClient::push, UncheckedIOException::new), update));
+		}
+	}
 
-    @Override
-    public void close() throws IOException {
-        OrbitMiscUtilities.tryStop(acceptThread, "Failed to stop the connection accepting thread");
-        OrbitMiscUtilities.tryStop(processThread, "Failed to stop the update processing thread");
-        serverSocket.close();
-        connections.forEach(OrbitFunctionUtilities.wrapException(Closeable::close, UncheckedIOException::new));
-        inputs.keySet().forEach(OrbitFunctionUtilities.wrapException(this::removeInput, RuntimeException::new));
-        outputs.keySet().forEach(OrbitFunctionUtilities.wrapException(this::removeOutput, RuntimeException::new));
-    }
+	synchronized void disconnect(OrbitApiClient client) {
+		connections.remove(client);
+	}
 
-    private final class InputEndpoint implements OrbitPipelineInputEndpoint {
-        private double value;
-        private boolean updating;
+	synchronized void updateInput(String input, double value) {
+		inputs.get(input).setValue(value);
+	}
 
-        @Override
-        public synchronized void accept(double v) {
-            value = value;
-            if (!updating) {
-                updating = true;
-                push(new Update());
-            }
-        }
+	@Override
+	public void close() throws IOException {
+		OrbitMiscUtilities.tryStop(acceptThread, "Failed to stop the connection accepting thread");
+		OrbitMiscUtilities.tryStop(processThread, "Failed to stop the update processing thread");
+		serverSocket.close();
+		connections.forEach(OrbitFunctionUtilities.wrapException(Closeable::close, UncheckedIOException::new));
+		inputs.keySet().forEach(OrbitFunctionUtilities.wrapException(this::removeInput, RuntimeException::new));
+		outputs.keySet().forEach(OrbitFunctionUtilities.wrapException(this::removeOutput, RuntimeException::new));
+	}
+	
+	private abstract class EndpointBase {
+		protected final String label;
+		protected double value;
+		protected boolean updating;
+		
+		public EndpointBase(String label) {
+			this.label = label;
+		}
+		
+		public final String getLabel() {
+			return label;
+		}
 
-        private synchronized void setUpdating(boolean updating) {
-            this.updating = updating;
-        }
+		protected final synchronized void setUpdating(boolean updating) {
+			this.updating = updating;
+		}
 
-        private synchronized void stop() {
-            updating = true;
-        }
+		public final synchronized void stop() {
+			setUpdating(true);
+		}
 
-        private final class Update extends OrbitApiSimpleUpdateBase {
-            public Update() {
-                super(0);
-            }
+		protected final class Update extends OrbitApiSimpleUpdateBase {
+			public Update(int channel) {
+				super(channel);
+			}
 
-            @Override
-            protected byte[] getPayload() {
-                synchronized (InputEndpoint.this) {
-                    byte[] payload = new byte[8];
-                    ByteBuffer.wrap(payload).putDouble(value);
-                    updating = false;
-                    return payload;
-                }
-            }
-        }
-    }
+			@Override
+			protected void writePayload(DataOutputStream output) throws IOException {
+				output.writeUTF(label);
+				synchronized (EndpointBase.this) {
+					output.writeDouble(value);
+					setUpdating(false);
+				}
+			}
+		}
+	}
 
-    private final class OutputEndpoint implements OrbitPipelineOutputEndpoint {
-        private Double value;
+	private final class InputEndpoint extends EndpointBase implements OrbitPipelineOutputEndpoint {
+		public InputEndpoint(String label) {
+			super(label);
+		}
 
-        @Override
-        public OptionalDouble get() {
-            return value == null ? OptionalDouble.empty() : OptionalDouble.of(value);
-        }
+		@Override
+		public OptionalDouble get() {
+			return Double.isNaN(value) ? OptionalDouble.empty() : OptionalDouble.of(value);
+		}
 
-        private void setValue(Double value) {
-            this.value = value;
-        }
-    }
+		public void setValue(Double value) {
+			this.value = value;
+			push(new Update(1));
+		}
+	}
+
+	private final class OutputEndpoint extends EndpointBase implements OrbitPipelineInputEndpoint {
+		public OutputEndpoint(String label) {
+			super(label);
+		}
+
+		@Override
+		public synchronized void accept(double v) {
+			value = v;
+			if (!updating) {
+				setUpdating(true);
+				push(new Update(0));
+			}
+		}
+	}
+	
+	private final class RemoveUpdate extends OrbitApiSimpleUpdateBase {
+		private final String label;
+		
+		public RemoveUpdate(InputEndpoint input) {
+			super(2);
+			label = input.getLabel();
+		}
+		
+		public RemoveUpdate(OutputEndpoint output) {
+			super(3);
+			label = output.getLabel();
+		}
+
+		@Override
+		protected void writePayload(DataOutputStream output) throws IOException {
+			output.writeUTF(label);
+		}
+	}
 }

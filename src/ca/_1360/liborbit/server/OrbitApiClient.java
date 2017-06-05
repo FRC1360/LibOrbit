@@ -14,11 +14,14 @@ public final class OrbitApiClient implements Closeable {
     private final Socket socket;
     private final OrbitMultiChannelStream mcs;
     private final HashMap<Integer, DataOutputStream> dataOutputStreamMap = new HashMap<>();
+    private final Thread processThread;
 
     OrbitApiClient(OrbitApiServer server, Socket socket) throws IOException {
         this.server = server;
         this.socket = socket;
         mcs = new OrbitMultiChannelStream(socket.getInputStream(), socket.getOutputStream());
+        processThread = new Thread(this::runProcess);
+        processThread.start();
     }
 
     public OrbitApiServer getServer() {
@@ -31,6 +34,17 @@ public final class OrbitApiClient implements Closeable {
 
     void push(OrbitApiUpdate update) throws IOException {
         update.write(OrbitFunctionUtilities.specializeSecond(dataOutputStreamMap::computeIfAbsent, ((Function<Integer, OutputStream>) mcs::getOutputStream).andThen(DataOutputStream::new))::apply);
+    }
+    
+    private void runProcess() {
+    	DataInputStream data = new DataInputStream(mcs.getInputStream(1));
+    	while (true) {
+    		try {
+				server.updateInput(data.readUTF(), data.readDouble());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
     }
 
     @Override
