@@ -168,6 +168,8 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             torque = (BASE_VOLTAGE * powerLevel - angularVelocity * MOTOR_CONSTANT) * MOTOR_CONSTANT / RESISTANCE;
             double accel = (torque - Math.copySign(friction.getAsDouble(), angularVelocity)) / inertia.getAsDouble();
             double newVel = angularVelocity + accel * 0.0001;
+            if (Double.isNaN(newVel))
+            	return;
             if (powerLevel != 0.0 || Math.signum(newVel) == Math.signum(angularVelocity))
                 angularVelocity = newVel;
             else
