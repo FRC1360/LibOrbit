@@ -31,7 +31,7 @@ public final class OrbitPid {
         dScale.getInput2().accept(kD);
         inner.accept(kIInner);
         outer.accept(kIOuter);
-        error.getInput2().accept(target);
+        error.getInput1().accept(target);
         try {
             OrbitStateMachineSimpleStates enabled = OrbitStateMachineSimpleStates.create(() -> {}, () -> {}, Collections.singletonList(new OrbitPipelineConnection(addID.getOutput(), addMain.getInput2(), false)), Collections.emptyList());
             OrbitStateMachineSimpleStates disabled = OrbitStateMachineSimpleStates.create(() -> {}, () -> {}, Collections.singletonList(new OrbitPipelineConnection(derivative, addMain.getInput2(), false)), Collections.emptyList());
@@ -78,11 +78,11 @@ public final class OrbitPid {
     }
 
     public OrbitPipelineInputEndpoint getTarget() {
-        return error.getInput2();
+        return error.getInput1();
     }
 
     public OrbitPipelineInputEndpoint getInput() {
-        return error.getInput1();
+        return error.getInput2();
     }
 
     public OrbitPipelineOutputEndpoint getError() {
