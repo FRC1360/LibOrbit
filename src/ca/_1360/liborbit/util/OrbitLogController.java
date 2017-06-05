@@ -30,17 +30,14 @@ public final class OrbitLogController extends OrbitPipelineComplexNodeBase {
 
     /**
      * @param outputStream The output stream to write to
+     * @throws IOException Thrown if there is an issue writing the headers to the stream
      */
-    public synchronized void addOutput(OutputStream outputStream) {
-        try (DataOutputStream output = new DataOutputStream(outputStream)) {
-        	// Write a command to add each field
-            for (String header : fields.keySet()) {
-                output.writeByte(0);
-                output.writeUTF(header);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
+    public synchronized void addOutput(OutputStream outputStream) throws IOException {
+        DataOutputStream output = new DataOutputStream(outputStream);
+    	// Write a command to add each field
+        for (String header : fields.keySet()) {
+            output.writeByte(0);
+            output.writeUTF(header);
         }
         outputs.add(outputStream);
     }
@@ -53,12 +50,13 @@ public final class OrbitLogController extends OrbitPipelineComplexNodeBase {
         return fields.computeIfAbsent(header, x -> {
         	// Write a command to each output stream to add the new field
             for (OutputStream outputStream : outputs) {
-                try (DataOutputStream output = new DataOutputStream(outputStream)) {
-                    output.writeByte(0);
-                    output.writeUTF(header);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                DataOutputStream output = new DataOutputStream(outputStream);
+                try {
+					output.writeByte(0);
+					output.writeUTF(header);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
             }
             return new InputEndpoint(0.0);
         });
@@ -70,6 +68,7 @@ public final class OrbitLogController extends OrbitPipelineComplexNodeBase {
     @Override
     protected synchronized void update() {
         try (ByteArrayOutputStream buffer = new ByteArrayOutputStream()) {
+        	byte[] bytes;
             try (DataOutputStream output = new DataOutputStream(buffer)) {
             	// Generate buffer
                 output.writeByte(1);
@@ -77,10 +76,8 @@ public final class OrbitLogController extends OrbitPipelineComplexNodeBase {
                 for (InputEndpoint input : fields.values()) {
                     output.writeDouble(input.getValue());
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
+                bytes = buffer.toByteArray();
             }
-            byte[] bytes = buffer.toByteArray();
             // Write to each output
             outputs.forEach(OrbitFunctionUtilities.specializeSecond(OrbitFunctionUtilities.handleException((OrbitExceptionalBiConsumer<OutputStream, byte[], IOException>) OutputStream::write, Throwable::printStackTrace), bytes));
         } catch (IOException e) {
