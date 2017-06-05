@@ -83,7 +83,8 @@ public final class OrbitAutonomousController<T> {
      */
     public void stop() {
     	// Start a finish command on each subsystem controller
-        controllers.values().forEach(OrbitFunctionUtilities.specializeSecondSupplier(SubsystemController::setState, FinishedCommand::new));
+    	if (controllers != null)
+    		controllers.values().forEach(OrbitFunctionUtilities.specializeSecondSupplier(SubsystemController::setState, FinishedCommand::new));
     }
 
     /**
