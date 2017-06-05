@@ -215,7 +215,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
      */
     public static final class EmulatedMotor {
         private static final double MOTOR_CONSTANT = 0.05;
-        private static final double RESISTANCE = 0.5;
+        private static final double RESISTANCE = 0.4;
         private static final double BASE_VOLTAGE = 12.0;
 
         private final int pdpPort;
@@ -288,7 +288,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
             // Calculate torque, angular acceleration, and new angular velocity
             torque = (BASE_VOLTAGE * powerLevel - angularVelocity * MOTOR_CONSTANT) * MOTOR_CONSTANT / RESISTANCE;
             double accel = (torque - Math.copySign(friction.getAsDouble(), angularVelocity)) / inertia.getAsDouble();
-            double newVel = angularVelocity + accel * 0.0001;
+            double newVel = angularVelocity + accel * 0.0000001;
             // Update angular velocity as applicable
             if (Double.isNaN(newVel))
             	return;
@@ -364,7 +364,7 @@ public final class OrbitEmulatedInputOutputProvider implements OrbitInputOutputP
          * Updates the encoder's position
          */
         public void update() {
-            position += motor.getAngularVelocity() * 0.01;
+            position += motor.getAngularVelocity() * 0.0000001;
         }
     }
 }
