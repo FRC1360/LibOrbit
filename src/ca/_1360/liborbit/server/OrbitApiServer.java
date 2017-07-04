@@ -95,7 +95,11 @@ public final class OrbitApiServer implements Closeable {
 	 * @param update An update to push to all clients
 	 */
 	public synchronized void push(OrbitApiUpdate update) {
-		updateQueue.offer(update);
+		try {
+			updateQueue.put(update);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -134,8 +138,11 @@ public final class OrbitApiServer implements Closeable {
 					e.printStackTrace();
 				}
 			while (update == null);
-			connections.forEach(OrbitFunctionUtilities.specializeSecond(
-					OrbitFunctionUtilities.wrapException(OrbitApiClient::push, UncheckedIOException::new), update));
+			try {
+				connections.forEach(OrbitFunctionUtilities.specializeSecond(OrbitFunctionUtilities.wrapException(OrbitApiClient::push, UncheckedIOException::new), update));
+			} catch (UncheckedIOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
