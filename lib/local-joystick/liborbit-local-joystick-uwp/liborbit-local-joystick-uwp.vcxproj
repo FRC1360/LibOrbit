@@ -161,9 +161,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Text Include="ReadMe.txt" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="ca__1360_liborbit_io_OrbitLocalJoystickProvider.h" />
     <ClInclude Include="joystick.h" />
     <ClInclude Include="stdafx.h" />
