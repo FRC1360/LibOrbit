@@ -7,6 +7,9 @@
 
 package ca._1360.liborbit.util.function;
 
+/**
+ * @param <E> The throwable type
+ */
 @FunctionalInterface
 public interface OrbitExceptionalRunnable<E extends Throwable> {
     void run() throws E;

@@ -7,6 +7,11 @@
 
 package ca._1360.liborbit.util.function;
 
+/**
+ * @param <T> The first parameter type
+ * @param <U> The second parameter type
+ * @param <E> The throwable type
+ */
 @FunctionalInterface
 public interface OrbitExceptionalBiPredicate<T, U, E extends Throwable> {
     boolean test(T t, U u) throws E;

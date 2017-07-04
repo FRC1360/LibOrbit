@@ -7,6 +7,10 @@
 
 package ca._1360.liborbit.util.function;
 
+/**
+ * @param <T> The parameter type
+ * @param <E> The throwable type
+ */
 @FunctionalInterface
 public interface OrbitExceptionalConsumer<T, E extends Throwable> {
     void accept(T t) throws E;
