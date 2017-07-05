@@ -65,3 +65,22 @@ A set of transformations was created for working with functional interfaces:
 * Composing methods: produce a single function from multiple that executes them in order, using the result of each as the parameter for the next; all values must be the same type due to Java generics limitations; exceptional versions are suffixed with -Ex
 * All/any methods: produce a single predicate-type functional interface from multiple that requires that all or any to approve the parameter(s); exceptional versions are suffixed with -Ex
 * Conditional methods: produce a result-less functional interface from an equivalent that executes it only if the given boolean supplier or predicate-type functional interface approves; exceptional versions are suffixed with -Ex
+
+## Pipeline System
+
+The pipeline system was created to facilitate common data processing loop systems with declarative programming principles. Programs can create connections between input and output endpoints on nodes, and the pipeline manager will ensure that there are no cyclic dependencies (via a Directed Acyclic Graph) and that calculations are performed in the proper order with minimal overhead. All data values are double-precision floating-point numbers ([FP64](https://en.wikipedia.org/wiki/Double-precision_floating-point_format)), and `OptionalDouble` is used as the data type to support the concept of "no value to supply" (for example, if multiple data points are required to calculate the output).
+
+### Filters
+
+A major use of the pipeline system will be pushing data through "filters", i.e. nodes that act as a single input and output endpoint; in other words, they are unary operators. Several filters for common mathematical operations used in robotics were created and included in the library.
+
+### Additional Utilities
+
+The following additional types were created for use in programs:
+
+* Complex node: a node that supports an arbitrary number of inputs and outputs
+* Binary operator node: a node with two inputs and one output that performs a binary operation
+* Constant value source: an output that always produces the same value
+* Export connector: an input that passes the given value to a consumer after a transformation
+* Simple source: an output that produces the value form a supplier
+* SmartDashboard export connector: an input that places the value in a SmartDashboard field
