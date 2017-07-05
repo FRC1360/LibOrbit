@@ -10,8 +10,8 @@ LibOrbit includes the following feature libraries:
 * Functional programming utilities
 * Pipeline system
 * Log controller
-* Autonomous controller
 * Generalized state machine implementation
+* Autonomous controller
 * Abstracted I/O APIs to remove hardware dependency
 * I/O emulation
 * Network API server
@@ -84,3 +84,11 @@ The following additional types were created for use in programs:
 * Export connector: an input that passes the given value to a consumer after a transformation
 * Simple source: an output that produces the value form a supplier
 * SmartDashboard export connector: an input that places the value in a SmartDashboard field
+
+## Log Controller
+
+To facilitate the organization of logging and of multiple log outputs, a log controller was created. This controller supports multiple outputs (represented as Java `OutputStream` objects), and uses a binary log format. Fields in the log output are provided by inputs from the pipeline system, and each entry also has a timestamp.
+
+## Generalized State Machine Implementation
+
+Many scenarios involve the use of [finite state machines](https://en.wikipedia.org/wiki/Finite-state_machine). To facilitate this use, a generalized implementation of state machines was created, to handle keeping track of the current state, and switching states. Each state must supply instructions to `initialize` (when the state machine enters the state), and `deinitialize` (when the state machine exits the state). Additionally, a version was created that supports automatic integration with the pipeline system by allowing states to provide a list of pipeline connections that are to be enabled when the machine enters that state, and disabled when the machine exits the state, as well as changes to state of other state machines to make when the state is entered.
