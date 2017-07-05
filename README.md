@@ -92,3 +92,7 @@ To facilitate the organization of logging and of multiple log outputs, a log con
 ## Generalized State Machine Implementation
 
 Many scenarios involve the use of [finite state machines](https://en.wikipedia.org/wiki/Finite-state_machine). To facilitate this use, a generalized implementation of state machines was created, to handle keeping track of the current state, and switching states. Each state must supply instructions to `initialize` (when the state machine enters the state), and `deinitialize` (when the state machine exits the state). Additionally, a version was created that supports automatic integration with the pipeline system by allowing states to provide a list of pipeline connections that are to be enabled when the machine enters that state, and disabled when the machine exits the state, as well as changes to state of other state machines to make when the state is entered.
+
+## Autonomous Controller
+
+To facilitate the creation and organization of complex autonomous routines, a controller was created to manage the flow of control between autonomous commands. Commands are divided into "subsystems", and only one command can be running on each subsystem at any given time. Finite state machines are used for individual subsystems, allowing the all features included therein to be used, such as enabling/disabling of pipeline connections.
