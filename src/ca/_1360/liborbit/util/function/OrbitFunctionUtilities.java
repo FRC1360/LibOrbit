@@ -198,7 +198,7 @@ public final class OrbitFunctionUtilities {
         };
     }
     
-    // Specialization methods: specify the value for first, second, both, or only parameter(s) of a functional interface; exceptional versions are suffixed with -Ex  
+    // Specialization methods: specify the value for first, second, both, or only parameter(s) of a functional interface; exceptional versions are suffixed with -Ex 
 
     public static <T, U> Consumer<U> specializeFirst(BiConsumer<? super T, ? super U> biConsumer, T t) {
         return u -> biConsumer.accept(t, u);
@@ -446,7 +446,7 @@ public final class OrbitFunctionUtilities {
     
     // Combining methods: produce a single result-less functional interface from multiple that executes them in order; exceptional versions are suffixed with -Ex
     
-    // Composing methods: produce a single function from multiple that executes them in order, using the result of each as the parameter for the next; all values must be the same type due to java generics limitations; exceptional versions are suffixed with -Ex
+    // Composing methods: produce a single function from multiple that executes them in order, using the result of each as the parameter for the next; all values must be the same type due to Java generics limitations; exceptional versions are suffixed with -Ex
     
     // All/any methods: produce a single predicate-type functional interface from multiple that requires that all or any to approve the parameter(s); exceptional versions are suffixed with -Ex
 
