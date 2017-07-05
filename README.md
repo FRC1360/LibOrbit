@@ -12,8 +12,7 @@ LibOrbit includes the following feature libraries:
 * Log controller
 * Generalized state machine implementation
 * Autonomous controller
-* Abstracted I/O APIs to remove hardware dependency
-* I/O emulation
+* Abstracted I/O APIs
 * Network API server
 
 ## Miscellaneous Programming Utilities
@@ -96,3 +95,12 @@ Many scenarios involve the use of [finite state machines](https://en.wikipedia.o
 ## Autonomous Controller
 
 To facilitate the creation and organization of complex autonomous routines, a controller was created to manage the flow of control between autonomous commands. Commands are divided into "subsystems", and only one command can be running on each subsystem at any given time. Finite state machines are used for individual subsystems, allowing the all features included therein to be used, such as enabling/disabling of pipeline connections.
+
+## Abstracted I/O APIs
+
+To create a more platform-independent environment, an abstraction layer was created on top of all APIs related to hardware input and output operations. A program supplies an "I/O provider" that handles all hardware input and output requests, and directs them to the appropriate library. Two such provider implementations are included:
+
+* Real input/output provider: forwards requests to appropriate WPILib libraries
+* Emulated input/output provider: emulates input and output hardware
+
+The emulation provider performs full emulation of electric motors and quadrature encoders, uses Xbox 360 controllers connected locally for joysticks, and allows the program to supply real-time values for other inputs.
