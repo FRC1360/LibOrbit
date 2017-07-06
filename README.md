@@ -104,3 +104,7 @@ To create a more platform-independent environment, an abstraction layer was crea
 * Emulated input/output provider: emulates input and output hardware
 
 The emulation provider performs full emulation of electric motors and quadrature encoders, uses Xbox 360 controllers connected locally for joysticks, and allows the program to supply real-time values for other inputs.
+
+## Network API Server
+
+To allow teams to interact with their robot through custom software on the driver station computer, a TCP-based API server was created that provides access to interfaces defined by the program. This includes SmartDashboard-style inputs and outputs that interact with the pipeline system, as well as arbitrary message passing. The library handles all aspects of pipeline system inputs/outputs, and provides support for sending and receiving messages to create other custom protocols of communication.
