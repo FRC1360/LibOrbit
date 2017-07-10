@@ -6,14 +6,18 @@
 namespace liborbit::neural_network::common {
     class node final {
     public:
-        size_t id;
+        __uint64_t id;
         double output;
 
-        node(size_t id);
+        node();
+
+        node(__uint64_t id);
     };
 
     class connection final {
     public:
+        connection();
+
         node *source;
         node *destination;
         double weight;
@@ -24,11 +28,15 @@ namespace liborbit::neural_network::common {
     class network final {
     public:
         node *nodes;
-        size_t node_count;
+        __uint64_t node_count;
         connection *connections;
-        size_t connection_count;
+        __uint64_t connection_count;
+        node **inputs;
+        __uint64_t input_count;
+        node **outputs;
+        __uint64_t output_count;
 
-        network(node *nodes, size_t node_count, connection *connections, size_t connection_count);
+        network(node *nodes, __uint64_t node_count, connection *connections, __uint64_t connection_count, node **inputs, __uint64_t input_count, node **outputs, __uint64_t output_count);
     };
 }
 
