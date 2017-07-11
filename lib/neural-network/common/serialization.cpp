@@ -1,7 +1,7 @@
 #include "serialization.h"
 
 namespace liborbit::neural_network::common {
-    void common::write(std::ostream &out, network &network) {
+    void write(std::ostream &out, network &network) {
         out + network.node_count + network.connection_count + network.input_count + network.output_count;
         for (__uint64_t i = 0; i < network.connection_count; ++i) {
             out + network.connections[i].source->id + network.connections[i].destination->id + network.connections[i].weight;
