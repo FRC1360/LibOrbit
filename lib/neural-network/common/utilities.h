@@ -27,6 +27,14 @@ namespace liborbit::neural_network::common {
         value_type destination;
 
         directed_acyclic_graph_default_connection(value_type source, value_type destination) : source(source), destination(destination) {}
+
+        bool operator==(const directed_acyclic_graph_default_connection &rhs) const {
+            return source == rhs.source && destination == rhs.destination;
+        }
+
+        bool operator!=(const directed_acyclic_graph_default_connection &rhs) const {
+            return !(rhs == *this);
+        }
     };
 
     template<class value_type, class connection_type = directed_acyclic_graph_default_connection<value_type>, value_type connection_type::*source = &directed_acyclic_graph_default_connection<value_type>::source, value_type connection_type::*destination = &directed_acyclic_graph_default_connection<value_type>::destination>
