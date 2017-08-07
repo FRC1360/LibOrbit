@@ -1,5 +1,5 @@
-#ifndef LIBORBIT_MODEL_H
-#define LIBORBIT_MODEL_H
+#ifndef LIBORBIT_NEURAL_NETWORK_MODEL_H
+#define LIBORBIT_NEURAL_NETWORK_MODEL_H
 
 #include <cstdio>
 #include <cstdint>
@@ -48,4 +48,4 @@ namespace liborbit::neural_network::common {
     };
 }
 
-#endif //LIBORBIT_MODEL_H
+#endif //LIBORBIT_NEURAL_NETWORK_MODEL_H
