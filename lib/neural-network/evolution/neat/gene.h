@@ -4,7 +4,7 @@
 #include <cstdint>
 
 namespace liborbit::neural_network::evolution::neat {
-    class gene {
+    class gene final {
     public:
         uint_fast32_t in;
         uint_fast32_t out;
