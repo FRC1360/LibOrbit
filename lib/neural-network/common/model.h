@@ -2,16 +2,17 @@
 #define LIBORBIT_MODEL_H
 
 #include <cstdio>
+#include <cstdint>
 
 namespace liborbit::neural_network::common {
     class node final {
     public:
-        __uint64_t id;
+        uint_fast32_t id;
         double output;
 
         node();
 
-        node(__uint64_t id);
+        node(uint_fast32_t id);
     };
 
     class connection final {
@@ -32,16 +33,16 @@ namespace liborbit::neural_network::common {
     class network final {
     public:
         node *nodes;
-        __uint64_t node_count;
+        uint_fast32_t node_count;
         connection *connections;
-        __uint64_t connection_count;
+        uint_fast32_t connection_count;
         node **inputs;
-        __uint64_t input_count;
+        uint_fast32_t input_count;
         node **outputs;
-        __uint64_t output_count;
-        __uint64_t *evaluation_order;
+        uint_fast32_t output_count;
+        uint_fast32_t *evaluation_order;
 
-        network(node *nodes, __uint64_t node_count, connection *connections, __uint64_t connection_count, node **inputs, __uint64_t input_count, node **outputs, __uint64_t output_count);
+        network(node *nodes, uint_fast32_t node_count, connection *connections, uint_fast32_t connection_count, node **inputs, uint_fast32_t input_count, node **outputs, uint_fast32_t output_count);
 
         void generate_evaluation_order();
     };
