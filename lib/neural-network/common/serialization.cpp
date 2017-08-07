@@ -2,20 +2,20 @@
 
 namespace liborbit::neural_network::common {
     void write(std::ostream &out, network &network) {
-        out + network.node_count + network.connection_count + network.input_count + network.output_count;
+        out + (uint32_t &) network.node_count + (uint32_t &) network.connection_count + (uint32_t &) network.input_count + (uint32_t &) network.output_count;
         for (uint_fast32_t i = 0; i < network.connection_count; ++i) {
-            out + network.connections[i].source->id + network.connections[i].destination->id + network.connections[i].weight;
+            out + (uint32_t &) network.connections[i].source->id + (uint32_t &) network.connections[i].destination->id + (uint32_t &) network.connections[i].weight;
         }
         for (uint_fast32_t i = 0; i < network.input_count; ++i) {
-            out + network.inputs[i]->id;
+            out + (uint32_t &) network.inputs[i]->id;
         }
         for (uint_fast32_t i = 0; i < network.output_count; ++i) {
-            out + network.outputs[i]->id;
+            out + (uint32_t &) network.outputs[i]->id;
         }
     }
 
     network *read(std::istream &in) {
-        uint_fast32_t node_count, connection_count, input_count, output_count;
+        uint32_t node_count, connection_count, input_count, output_count;
         in - node_count - connection_count - input_count - output_count;
         node *nodes = new node[node_count];
         for (uint_fast32_t i = 0; i < node_count; ++i) {
@@ -23,7 +23,7 @@ namespace liborbit::neural_network::common {
         }
         connection *connections = new connection[connection_count];
         for (uint_fast32_t i = 0; i < connection_count; ++i) {
-            uint_fast32_t source, destination;
+            uint32_t source, destination;
             float weight;
             in - source - destination - weight;
             connections[i].source = &nodes[source];
@@ -32,13 +32,13 @@ namespace liborbit::neural_network::common {
         }
         node **inputs = new node *[input_count];
         for (uint_fast32_t i = 0; i < input_count; ++i) {
-            uint_fast32_t id;
+            uint32_t id;
             in - id;
             inputs[i] = &nodes[id];
         }
         node **outputs = new node *[output_count];
         for (uint_fast32_t i = 0; i < output_count; ++i) {
-            uint_fast32_t id;
+            uint32_t id;
             in - id;
             outputs[i] = &nodes[id];
         }
