@@ -8,6 +8,8 @@
 #include <stack>
 
 namespace liborbit::neural_network::common {
+    double sigmoid(double value);
+
     template<class value_type>
     inline std::ostream &operator+(std::ostream &stream, value_type &value) {
         stream.write((const char *) &value, sizeof(value_type));
