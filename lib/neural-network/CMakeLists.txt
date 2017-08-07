@@ -7,4 +7,6 @@ set(SOURCE_COMMON common/model.cpp common/model.h common/serialization.cpp commo
 
 set(SOURCE_EVALUATION evaluation/evaluation.cpp evaluation/evaluation.h)
 
-add_executable(liborbit-neural-network-train ${SOURCE_COMMON} ${SOURCE_EVALUATION})
+set(SOURCE_NEAT evolution/neat/genome.cpp evolution/neat/genome.h evolution/neat/gene.cpp evolution/neat/gene.h)
+
+add_executable(liborbit-neural-network-train ${SOURCE_COMMON} ${SOURCE_EVALUATION} ${SOURCE_NEAT})
