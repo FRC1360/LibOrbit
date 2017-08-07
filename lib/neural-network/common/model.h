@@ -8,7 +8,7 @@ namespace liborbit::neural_network::common {
     class node final {
     public:
         uint_fast32_t id;
-        double output;
+        float output;
 
         node();
 
@@ -21,9 +21,9 @@ namespace liborbit::neural_network::common {
 
         node *source;
         node *destination;
-        double weight;
+        float weight;
 
-        connection(node *source, node *destination, double weight);
+        connection(node *source, node *destination, float weight);
 
         bool operator==(const connection &rhs) const;
 

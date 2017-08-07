@@ -4,7 +4,7 @@
 #include "../common/model.h"
 
 namespace liborbit::neural_network::evaluation {
-    void evaluate(common::network *network, double *inputs, double *outputs);
+    void evaluate(common::network *network, float *inputs, float *outputs);
 }
 
 #endif //LIBORBIT_NEURAL_NETWORK_EVALUATION_H

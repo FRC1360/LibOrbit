@@ -9,7 +9,7 @@ namespace liborbit::neural_network::common {
 
     node::node() : output(NAN) {}
 
-    connection::connection(node *source, node *destination, double weight) : source(source), destination(destination), weight(weight) {}
+    connection::connection(node *source, node *destination, float weight) : source(source), destination(destination), weight(weight) {}
 
     connection::connection() : source(NULL), destination(NULL) {}
 

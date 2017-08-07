@@ -2,7 +2,7 @@
 #include <cstdint>
 
 namespace liborbit::neural_network::evaluation {
-    void evaluate(common::network *network, double *inputs, double *outputs) {
+    void evaluate(common::network *network, float *inputs, float *outputs) {
         for (uint_fast32_t i = 0; i < network->node_count; ++i) {
             network->nodes[i].output = 0;
         }

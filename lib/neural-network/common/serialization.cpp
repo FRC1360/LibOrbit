@@ -24,7 +24,7 @@ namespace liborbit::neural_network::common {
         connection *connections = new connection[connection_count];
         for (uint_fast32_t i = 0; i < connection_count; ++i) {
             uint_fast32_t source, destination;
-            double weight;
+            float weight;
             in - source - destination - weight;
             connections[i].source = &nodes[source];
             connections[i].destination = &nodes[destination];
