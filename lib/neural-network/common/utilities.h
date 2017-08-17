@@ -6,6 +6,7 @@
 #include <list>
 #include <algorithm>
 #include <stack>
+#include <functional>
 
 namespace liborbit::neural_network::common {
     double sigmoid(double value);
@@ -87,6 +88,24 @@ namespace liborbit::neural_network::common {
                 return true;
             }
             return false;
+        }
+    };
+
+    template<class T>
+    class container final {
+    private:
+        T value;
+        std::function<void(T &)> handler;
+
+    public:
+        container(T value, const std::function<void(T &)> &handler) : value(value), handler(handler) {}
+
+        T &getValue() const {
+            return value;
+        }
+
+        virtual ~container() {
+            handler(value);
         }
     };
 }
