@@ -23,14 +23,22 @@
 
 package ca._1360.liborbit.position;
 
+import java.time.Instant;
+
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
 import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
 import ca._1360.liborbit.pipeline.filters.OrbitIdentityFilter;
+import ca._1360.liborbit.util.jni.OrbitInputEventsReader;
+import ca._1360.liborbit.util.jni.OrbitInputEventsReader.EventHandler;
 
-public class OrbitOpticalMousePositionSource implements OrbitPositionSource {
+public final class OrbitOpticalMousePositionSource implements OrbitPositionSource, EventHandler {
 	private OrbitIdentityFilter orientation = new OrbitIdentityFilter();
 	private double x;
 	private double y;
+	
+	public OrbitOpticalMousePositionSource() {
+		OrbitInputEventsReader.addHandler("/dev/input/mice", this);
+	}
 
 	/* (non-Javadoc)
 	 * @see ca._1360.liborbit.position.OrbitPositionSource#getX()
@@ -60,5 +68,10 @@ public class OrbitOpticalMousePositionSource implements OrbitPositionSource {
 	
 	public OrbitPipelineInputEndpoint getOrientationInput() {
 		return orientation;
+	}
+
+	@Override
+	public void acceptInputEvent(Instant time, short type, short code, int value) {
+		// TODO Auto-generated method stub
 	}
 }
