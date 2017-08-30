@@ -1,8 +1,8 @@
 CC=gcc
 CXX=g++
 RM=rm -f
-CFLAGS=-g -O3 -std=c11
-CXXFLAGS=-g -O3 -std=c++11 "-I$(JAVA_HOME)/include" "-I$(JAVA_HOME)/include/linux"
+CFLAGS=-g -O3 -fPIC -std=c11
+CXXFLAGS=-g -O3 -fPIC -std=gnu++11 "-I$(JAVA_HOME)/include" "-I$(JAVA_HOME)/include/linux"
 LDFLAGS=-shared -O3
 
 JNI_SRC:=$(wildcard src/jni/*.cpp)
@@ -30,4 +30,4 @@ bin/liborbit-native.so: $(JNI_OBJ) $(MAIN_OBJ) $(ASM_OBJ)
 all: bin/liborbit-native.so
 
 clean:
-	$(RM) bin/liborbit-native.so $(wildcard obj/jni/*) $(wildcard obj/main/*) $(wildcard obj/asm/*)
+	$(RM) bin/liborbit-native.so $(wildcard obj/jni/*.o) $(wildcard obj/main/*.o) $(wildcard obj/asm/*.o)
