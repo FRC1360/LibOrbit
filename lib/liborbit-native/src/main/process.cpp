@@ -1,4 +1,4 @@
-#include "pseudo_sudo.h"
+#include "process.h"
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -6,7 +6,7 @@
 #include <signal.h>
 
 namespace liborbit {
-    pseudo_sudo_process::temp_config pseudo_sudo_process::configure(const char *path, char *const argv[]) {
+    process::temp_config process::configure(const char *path, char *const argv[]) {
         int sockets[2];
         socketpair(AF_INET, SOCK_STREAM, 0, &sockets[0]);
         pid_t child = fork();
@@ -25,11 +25,11 @@ namespace liborbit {
         }
     }
 
-    pseudo_sudo_process::pseudo_sudo_process(temp_config config) : pid(config.pid), proc_in(config.buf), proc_out_err(config.buf) {}
+    process::process(temp_config config) : pid(config.pid), proc_in(config.buf), proc_out_err(config.buf) {}
 
-    pseudo_sudo_process::pseudo_sudo_process(const char *path, char *const argv[]) : pseudo_sudo_process(configure(path, argv)) {}
+    process::process(const char *path, char *const argv[]) : process(configure(path, argv)) {}
 
-    pseudo_sudo_process::~pseudo_sudo_process() {
+    process::~process() {
         kill(pid, SIGTERM);
     }
 }
