@@ -793,6 +793,15 @@ public class OrbitInputEventsReader {
 	
 	private native void run();
 	
+	private void handleInternal(long time, short type, short code, int value)
+	{
+		Instant _time = Instant.ofEpochSecond(time / 1000000, time % 1000000 * 1000);
+		for (EventHandler handler : handlers)
+		{
+			handler.acceptInputEvent(_time, type, code, value);
+		}
+	}
+	
 	private void addHandlerInternal(EventHandler handler) {
 		handlers.add(handler);
 	}
