@@ -1,10 +1,10 @@
 #include "pseudo_sudo.h"
 #include <string>
+#include <unistd.h>
 #include <arpa/inet.h>
 
 // From the libssh2 examples
-static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
-{
+static int waitsocket(int socket_fd, LIBSSH2_SESSION *session) {
     struct timeval timeout;
     int rc;
     fd_set fd;
@@ -35,7 +35,7 @@ static int waitsocket(int socket_fd, LIBSSH2_SESSION *session)
 }
 
 namespace liborbit {
-    pseudo_sudo_process::pseudo_sudo_process(const char *command) {
+    pseudo_sudo_process::pseudo_sudo_process(const char *command, std::function<void(int)> exit_status_handler, std::function<void(char *)> exit_signal_handler) : exit_status_handler(exit_status_handler), exit_signal_handler(exit_signal_handler) {
         int rc = libssh2_init(0);
         if (rc) {
             char error[64];
@@ -43,7 +43,7 @@ namespace liborbit {
             throw std::string(error);
         }
         in_addr_t addr = htons(0x7F000001);
-        int sock = socket(AF_INET, SOCK_STREAM, 0);
+        sock = socket(AF_INET, SOCK_STREAM, 0);
         sockaddr_in sin;
         sin.sin_family = AF_INET;
         sin.sin_port = htons(22);
@@ -89,5 +89,27 @@ namespace liborbit {
 
     ssize_t pseudo_sudo_process::write(const char *buffer, size_t buffer_size) {
         return libssh2_channel_write(channel, buffer, buffer_size);
+    }
+
+    pseudo_sudo_process::~pseudo_sudo_process() {
+        int rc;
+        while ((rc = libssh2_channel_close(channel)) == LIBSSH2_ERROR_EAGAIN) {
+            waitsocket(sock, session);
+        }
+        if (!rc) {
+            int exitcode = libssh2_channel_get_exit_status(channel);
+            char *exitsignal;
+            libssh2_channel_get_exit_signal(channel, &exitsignal, NULL, NULL, NULL, NULL, NULL);
+            if (exitsignal) {
+                exit_signal_handler(exitsignal);
+            } else {
+                exit_status_handler(exitcode);
+            }
+        }
+        libssh2_channel_free(channel);
+        channel = NULL;
+        libssh2_session_disconnect(session, "Normal shutdown.");
+        libssh2_session_free(session);
+        close(sock);
     }
 }
