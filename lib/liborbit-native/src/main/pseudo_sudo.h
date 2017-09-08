@@ -13,6 +13,9 @@ namespace liborbit {
     public:
         pseudo_sudo_process(const char *command, std::function<void(int)> exit_status_handler, std::function<void(char *)> exit_signal_handler);
 
+        pseudo_sudo_process(const pseudo_sudo_process &other) = delete;
+        pseudo_sudo_process &operator=(const pseudo_sudo_process &other) = delete;
+        
         ssize_t read(char *buffer, size_t buffer_size);
         ssize_t write(const char *buffer, size_t buffer_size);
 
