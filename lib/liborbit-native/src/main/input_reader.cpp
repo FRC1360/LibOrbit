@@ -29,13 +29,9 @@ namespace liborbit {
         error_handler(error.str());
     }
 
-    void input_reader::run_loop(std::function<void()> stop) {
-        this->stop = stop;
-    }
-
-    input_reader::~input_reader() {
-        if (stop) {
-            stop();
+    void input_reader::run_loop(std::function<bool()> work) {
+        while (work()) {
+            input_event event;
         }
     }
 }

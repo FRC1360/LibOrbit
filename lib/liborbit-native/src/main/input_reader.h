@@ -9,7 +9,6 @@ namespace liborbit {
         pseudo_sudo_process process;
         std::function<void(input_event)> handler;
         std::function<void(std::string)> error_handler;
-        std::function<void()> stop;
         
         input_reader(const char *command, std::function<void(input_event)> handler, std::function<void(std::string)> error_handler, void *);
 
@@ -19,8 +18,6 @@ namespace liborbit {
     public:
         input_reader(const char *path, std::function<void(input_event)> handler, std::function<void(std::string)> error_handler);
 
-        void run_loop(std::function<void()> stop);
-
-        ~input_reader();
+        void run_loop(std::function<bool()> work);
     };
 }
