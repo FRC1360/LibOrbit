@@ -23,3 +23,31 @@ A description of each module in this category follows.
 ### ca._1360.liborbit.util.jni.OrbitInputEventsReader
 
 This module provides asynchronous reading of event objects from Linux input character device files (usually located in `/dev/input`). As each event is read, the `handleInternal` Java function is called with the appropriate information.
+
+## Main Code
+
+This category contains C++ code that implements the core functionality requiring native code. Code here should be written, within reason, as if it were to be consumed by a native C++ program (as opposed to a Java program); this means that it should not be directly dependent on the JNI or on any code in `src/jni`. Source code should be in `.cpp` files with matching `.h` header files.
+
+A description of each module in this category follows.
+
+### container
+
+This module provides a simple reference-counting value wrapper that executes custom code when the last reference is destroyed; it takes advantage of C++ destructors to provide this functionality. It is designed to be used as a utility by other parts of the main code.
+
+### pseudo_sudo
+
+This module implements functionality based on that of the `sudo` command present on many Unix-like systems; namely, it allows a command to be run with escalated permissions. However, due to the not-api-friendly nature of priviledge escalation software available on the RoboRIO, the best available method is to use the secure shell protocol (SSH) to connect to the RoboRIO as the Admin user. This is done using libssh2.
+
+### process
+
+This module provides the ability to create child processes, and to interact with the standard input, output and error streams. This is done using the `fork` and `execve` syscalls.
+
+### input_reader
+
+This module uses `pseudo_sudo` to provide continuous reading of event objects from Linux input character device files (usually located in `/dev/input`), calling a custom callback with each event object.
+
+## Assembly
+
+This category contains code written in ARM assembly to implement specific high-performance sections of code that would be too inefficient if implemented in standard C++. Code here should be written using the standard A32 calling convention, as if it were to be used by standard C code. Source code should be in `.S` files, with matching `.h` header files compatible with C and C++.
+
+There are not yet any modules in this category.
