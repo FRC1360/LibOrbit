@@ -7,7 +7,7 @@ LDFLAGS=-shared -O3
 
 JNI_SRC:=$(wildcard src/jni/*.cpp)
 MAIN_SRC:=$(wildcard src/main/*.cpp)
-ASM_SRC:=$(wildcard src/asm/*.cpp)
+ASM_SRC:=$(wildcard src/asm/*.S)
 
 JNI_OBJ:=$(addprefix obj/jni/,$(notdir $(JNI_SRC:.cpp=.o)))
 MAIN_OBJ:=$(addprefix obj/main/,$(notdir $(MAIN_SRC:.cpp=.o)))
