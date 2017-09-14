@@ -18,7 +18,7 @@
 *
 * Contributions:
 *
-* Nicholas Mertin (2017-08-27) - Created file
+* Nicholas Mertin (2017-09-11) - Created file
 */
 
 package ca._1360.liborbit.util.jni;
