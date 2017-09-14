@@ -51,3 +51,18 @@ This module uses `pseudo_sudo` to provide continuous reading of event objects fr
 This category contains code written in ARM assembly to implement specific high-performance sections of code that would be too inefficient if implemented in standard C++. Code here should be written using the standard A32 calling convention, as if it were to be used by standard C code. Source code should be in `.S` files, with matching `.h` header files compatible with C and C++.
 
 There are not yet any modules in this category.
+
+## Compilation Instructions
+
+Compilation should be performed with GCC and GNU Binutils targeted at ARM Linux. This can either be done natively, or with a cross-compiler; however, a cross-compiler will require additional setup, and has not been tested. If a prefix is required for `gcc` and `g++` commands, it should be put in the `PREFIX` environment variable.
+
+Additionally, development binaries for one of the following cryptography libraries must be installed on the local system; this is required for compiling libssh2:
+
+- OpenSSL
+- Libgcrypt
+- WinCNG
+- mbedTLS
+
+To compile the library, open a POSIX-compatible shell (such as `bash`) in this directory, and run `make`. If the command is not found, then you should download GNU Make from your Linux distribution's repositories, or from [GNU Savannah](http://savannah.gnu.org/projects/make).
+
+This command ensures that all dependencies are up to date, configured, and compiled, and then compiles the main liborbit-native code. it will show any warnings and errors, and if the compilation is succesful, create the final library in `bin/liborbit-native.so`.
