@@ -2,6 +2,10 @@
 
 An abstraction layer for FRC programming, developed by Team 1360 Orbit Robotics.
 
+## License
+
+The source code of this project is distributed under the GNU GPL version 3 or later, which is located in the file called `LICENSE`. If you cannot access this file, the license is available [on the GNU website](http://www.gnu.org/licenses/).
+
 ## Features Overview
 
 LibOrbit includes the following feature libraries:
