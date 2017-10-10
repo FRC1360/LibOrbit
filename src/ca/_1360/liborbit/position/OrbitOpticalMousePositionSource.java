@@ -19,11 +19,13 @@
 * Contributions:
 *
 * Nicholas Mertin (2017-08-27) - Created file
+* Nicholas Mertin (2017-10-10) - Implemented acceptInputEvent and pipeline endpoints, and added scale endpoint
 */
 
 package ca._1360.liborbit.position;
 
 import java.time.Instant;
+import java.util.OptionalDouble;
 
 import ca._1360.liborbit.pipeline.OrbitPipelineInputEndpoint;
 import ca._1360.liborbit.pipeline.OrbitPipelineOutputEndpoint;
@@ -33,8 +35,11 @@ import ca._1360.liborbit.util.jni.OrbitInputEventsReader.EventHandler;
 
 public final class OrbitOpticalMousePositionSource implements OrbitPositionSource, EventHandler {
 	private OrbitIdentityFilter orientation = new OrbitIdentityFilter();
-	private double x;
-	private double y;
+	private OrbitIdentityFilter scale = new OrbitIdentityFilter();
+	private volatile double x;
+	private volatile double y;
+	private OrbitPipelineOutputEndpoint xEndpoint = () -> OptionalDouble.of(x);
+	private OrbitPipelineOutputEndpoint yEndpoint = () -> OptionalDouble.of(y);
 	
 	public OrbitOpticalMousePositionSource() {
 		OrbitInputEventsReader.addHandler("/dev/input/mice", this);
@@ -45,8 +50,7 @@ public final class OrbitOpticalMousePositionSource implements OrbitPositionSourc
 	 */
 	@Override
 	public OrbitPipelineOutputEndpoint getX() {
-		// TODO Auto-generated method stub
-		return null;
+		return xEndpoint;
 	}
 
 	/* (non-Javadoc)
@@ -54,8 +58,7 @@ public final class OrbitOpticalMousePositionSource implements OrbitPositionSourc
 	 */
 	@Override
 	public OrbitPipelineOutputEndpoint getY() {
-		// TODO Auto-generated method stub
-		return null;
+		return yEndpoint;
 	}
 
 	/* (non-Javadoc)
@@ -69,9 +72,19 @@ public final class OrbitOpticalMousePositionSource implements OrbitPositionSourc
 	public OrbitPipelineInputEndpoint getOrientationInput() {
 		return orientation;
 	}
+	
+	public OrbitPipelineInputEndpoint getScaleInput() {
+		return scale;
+	}
 
 	@Override
 	public void acceptInputEvent(Instant time, short type, short code, int value) {
-		// TODO Auto-generated method stub
+		if (type == OrbitInputEventsReader.EV_REL) {
+			if (code == OrbitInputEventsReader.REL_X) {
+				x += scale.get().orElse(1.0) * Math.cos(orientation.get().orElse(0.0)) * value;
+			} else if (code == OrbitInputEventsReader.REL_Y) {
+				y += scale.get().orElse(1.0) * Math.sin(orientation.get().orElse(0.0)) * value;
+			}
+		}
 	}
 }
