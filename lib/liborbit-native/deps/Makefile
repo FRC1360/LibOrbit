@@ -37,6 +37,7 @@ configure-libssh2:
 
 libssh2.a: configure-libssh2
 	$(MAKE) -C ../../libssh2/bin
+	mkdir -p include
 	rm -f libssh2.a include/libssh2
 	ln -s ../../libssh2/bin/src/libssh2.a libssh2.a
 	ln -s ../../../libssh2/include include/libssh2

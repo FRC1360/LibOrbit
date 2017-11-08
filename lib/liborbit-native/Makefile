@@ -45,16 +45,20 @@ clean:
 	$(RM) bin/liborbit-native.so $(wildcard obj/jni/*.o) $(wildcard obj/main/*.o) $(wildcard obj/asm/*.o)
 
 obj/jni/%.o: src/jni/%.cpp
+	mkdir -p obj/jni
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 obj/main/%.o: src/main/%.cpp
+	mkdir -p obj/main
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 obj/asm/%.o: src/asm/%.S
+	mkdir -p obj/asm
 	$(CC) $(CFLAGS) -c $< -o $@
 
 deps:
 	$(MAKE) -C deps all
 
 bin/liborbit-native.so: deps $(JNI_OBJ) $(MAIN_OBJ) $(ASM_OBJ) $(DEPS)
+	mkdir -p bin
 	$(CXX) $(LDFLAGS) $(JNI_OBJ) $(MAIN_OBJ) $(ASM_OBJ) $(DEPS) -o $@
